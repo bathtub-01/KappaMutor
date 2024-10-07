@@ -31,29 +31,65 @@ class StackPort[T <: Data](t: T) extends Bundle {
 
 class RegStack[T <: Data](depth: Int, t: T) extends Module {
   val io = IO(new StackPort(t))
-  val stkPtr = RegInit(0.U(log2Ceil(depth).W))
-  val stkMem = Module(new BlockMem(depth, t))
-  val top_elm = RegInit(0.U.asTypeOf((t)))
+  val stkPtr = RegInit(0.U(log2Ceil(depth - 1).W))
+  val stkMem = Module(new BlockMem(depth - 1, t))
+  val topElm = RegInit(0.U.asTypeOf(t))
+  val elmCount = RegInit(0.U(log2Ceil(depth).W))
 
   stkMem.init(stkPtr - 1.U)
+  // stkMem.io := DontCare
+  // stkMem.io.rdAddr := stkPtr - 1.U
+  // stkMem.io.wrEna := false.B
  
   switch(io.opcode) {
-    is(idle) { /* do nothing */ }
-    is(push) {
-      top_elm := io.din
-      stkMem.write(top_elm, stkPtr)
-      stkPtr := stkPtr + 1.U
+    is(StackOpCode.idle) { /* do nothing */ }
+    is(StackOpCode.push) {
+      topElm := io.din
+      when(elmCount =/= 0.U) {
+        stkMem.write(topElm, stkPtr)
+        stkPtr := stkPtr + 1.U
+      }
+      elmCount := elmCount + 1.U
     }
-    is(pop) {
-      stkMem.readOut(top_elm)
-      stkPtr := stkPtr - 1.U
+    is(StackOpCode.pop) {
+      when(elmCount > 1.U) {
+        topElm := stkMem.readOut
+        stkMem.read(stkPtr - 1.U)
+        stkPtr := stkPtr - 1.U
+        elmCount := elmCount - 1.U
+      }.elsewhen(elmCount === 1.U) {
+        topElm := 0.U.asTypeOf(t)
+        elmCount := 0.U
+      }
     }
-    is(modify) {
-      top_elm := io.din
+    is(StackOpCode.modify) {
+      topElm := io.din
     }
   }
 
-  io.top := top_elm
+  io.top := topElm
+
+  def init: Unit = {
+    io := DontCare
+    io.opcode := StackOpCode.idle
+  }
+
+  def idle = init
+
+  def push(data: T) = {
+    io.opcode := StackOpCode.push
+    io.din := data
+  }
+
+  def pop: T = {
+    io.opcode := StackOpCode.pop
+    io.top
+  }
+
+  def modify(data: T) = {
+    io.opcode := StackOpCode.modify
+    io.din := data
+  }
 }
 
 object RegStack extends App {

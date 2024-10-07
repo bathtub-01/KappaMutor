@@ -30,12 +30,15 @@ class BlockMem[T <: Data](depth: Int, t: T) extends Module {
     io.wrData := data
     io.wrAddr := addr
   }
+
   def read(addr: UInt) = {
     io.rdAddr := addr
   }
-  def readOut(box: T) = {
-    box := io.rdData
+
+  def readOut: T = {
+    io.rdData
   }
+
   def init(defaultAddr: UInt) = {
     io := DontCare
     io.rdAddr := defaultAddr
