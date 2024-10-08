@@ -1,14 +1,11 @@
 package common
 
 import chisel3._
-import chisel3.simulator.EphemeralSimulator._
+// import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
 import tester._
-
-import java.nio.file.Paths
-
 
 class RegStackSpec extends AnyFlatSpec with Matchers with VerilatorTestRunner{
   val compiled = TestRunnerConfig(withWaveform = true, ephemeral = false).compile(new RegStack(32, UInt(8.W)))

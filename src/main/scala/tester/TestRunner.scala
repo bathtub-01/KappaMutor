@@ -3,8 +3,8 @@ package tester
 import chisel3._
 import svsim._
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+// import java.time.LocalDateTime
+// import java.time.format.DateTimeFormatter
 
 /** Provides method to run simulation with Scala-written testbench.
   *

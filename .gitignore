@@ -348,5 +348,8 @@ hs_err_pid*
 # chisel generated files
 generated/
 
+# chisel testing files
+generated-test/
+
 # simulation output
 simu-out/

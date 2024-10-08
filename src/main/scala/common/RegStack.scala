@@ -23,51 +23,63 @@ object StackOpCode extends ChiselEnum {
 import StackOpCode._
 
 
-class StackPort[T <: Data](t: T) extends Bundle {
+class StackPort[T <: Data](depth: Int, t: T) extends Bundle {
   val opcode = Input(StackOpCode())
   val din = Input(t)
   val top = Output(t)
+  val elms = Output(UInt(log2Ceil(depth).W))
 }
 
 class RegStack[T <: Data](depth: Int, t: T) extends Module {
-  val io = IO(new StackPort(t))
+  val io = IO(new StackPort(depth, t))
   val stkPtr = RegInit(0.U(log2Ceil(depth - 1).W))
   val stkMem = Module(new BlockMem(depth - 1, t))
   val topElm = RegInit(0.U.asTypeOf(t))
   val elmCount = RegInit(0.U(log2Ceil(depth).W))
+  val lastPushed = RegInit(0.U.asTypeOf(t)) // avoid read-after-write
+  val justPushed = RegInit(false.B)
 
   stkMem.init(stkPtr - 1.U)
-  // stkMem.io := DontCare
-  // stkMem.io.rdAddr := stkPtr - 1.U
-  // stkMem.io.wrEna := false.B
  
   switch(io.opcode) {
-    is(StackOpCode.idle) { /* do nothing */ }
+    is(StackOpCode.idle) { 
+      justPushed := false.B
+    }
     is(StackOpCode.push) {
       topElm := io.din
       when(elmCount =/= 0.U) {
         stkMem.write(topElm, stkPtr)
         stkPtr := stkPtr + 1.U
+        lastPushed := topElm
+        justPushed := true.B
       }
       elmCount := elmCount + 1.U
     }
     is(StackOpCode.pop) {
       when(elmCount > 1.U) {
-        topElm := stkMem.readOut
-        stkMem.read(stkPtr - 1.U)
+        // topElm := stkMem.readOut
+        when(justPushed) {
+          topElm := lastPushed
+        }.otherwise {
+          topElm := stkMem.readOut
+        }
+        stkMem.read(stkPtr - 2.U)
         stkPtr := stkPtr - 1.U
         elmCount := elmCount - 1.U
       }.elsewhen(elmCount === 1.U) {
         topElm := 0.U.asTypeOf(t)
         elmCount := 0.U
       }
+      justPushed := false.B
     }
     is(StackOpCode.modify) {
       topElm := io.din
+      justPushed := false.B
     }
   }
 
   io.top := topElm
+  io.elms := elmCount
 
   def init: Unit = {
     io := DontCare
@@ -90,6 +102,8 @@ class RegStack[T <: Data](depth: Int, t: T) extends Module {
     io.opcode := StackOpCode.modify
     io.din := data
   }
+
+  def elms: UInt = io.elms
 }
 
 object RegStack extends App {
