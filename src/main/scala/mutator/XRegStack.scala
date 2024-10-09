@@ -26,23 +26,25 @@ import common._
 
   If pop > 0 and push > 0, the pop will happen before push.
 */
-class XRegStackPort[T <: Data](n: Int, t: T) extends Bundle {
+class XRegStackPort[T <: Data](n: Int, depthEach: Int, t: T) extends Bundle {
   val din = Input(Vec(n, t))
   val top = Output(Vec(n,t))
   val pop = Input(UInt(log2Ceil(n + 1).W))
   val push = Input(UInt(log2Ceil(n + 1).W))
+  val elms = Output(UInt(log2Ceil(n * depthEach + 1).W))
 }
 
 
 class XRegStack[T <: Data](n: Int, depthEach: Int, t: T) extends Module {
   require(n > 0 && (n & (n - 1)) == 0) // n better be the power of 2
-  val io = IO(new XRegStackPort(n, t))  
-  val elms = Wire(UInt(log2Ceil(n * depthEach).W))
+  val io = IO(new XRegStackPort(n, depthEach, t))  
+  val elms = Wire(UInt(log2Ceil(n * depthEach + 1).W))
   val subStks = Seq.fill(n)(Module(new RegStack(depthEach, t)))
   val subStkPorts = Wire(Vec(n, new StackPort(depthEach, t)))
 
   subStkPorts.zip(subStks).foreach{case (port, stk) => port <> stk.io}
-  elms := subStkPorts.map(_.elms).reduce(_ + _)
+  elms := subStkPorts.map(_.elms).reduce(_ +& _)
+  io.elms := elms
 
   def rotate(i: UInt, elms: UInt): UInt = (elms % n.U - i - 1.U) % n.U
 

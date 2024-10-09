@@ -1,83 +1,62 @@
 package mutator
 
 import chisel3._
+import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.flatspec.AnyFlatSpec
-import tester._
 
-class XRegStackSpec extends AnyFlatSpec with Matchers with VerilatorTestRunner{
-  val compiled = TestRunnerConfig(withWaveform = true, ephemeral = false).compile(new XRegStack(8, 32, UInt(16.W)))
-  "XRegStack" should "behave" in {
-    compiled.runSim { dut =>
-      import TestRunnerUtils._
-      dut.clock.step(5)
-      dut.io.push #= 1.U
-      dut.io.din(0) #= 1.U
-      dut.clock.step()
-      dut.io.push #= 3.U
-      dut.io.din(0) #= 4.U
-      dut.io.din(1) #= 3.U
-      dut.io.din(2) #= 2.U
-      dut.clock.step()
-      dut.io.push #= 1.U
-      dut.io.pop #= 2.U
-      dut.io.din(0) #= 5.U
-      dut.clock.step()
-      dut.io.push #= 2.U
-      dut.io.pop #= 1.U
-      dut.io.din(0) #= 6.U
-      dut.io.din(1) #= 7.U
-      dut.clock.step()
-      dut.io.push #= 8.U
-      dut.io.pop #= 0.U
-      dut.io.din(0) #= 100.U
-      dut.io.din(1) #= 200.U
-      dut.io.din(2) #= 300.U
-      dut.io.din(3) #= 400.U
-      dut.io.din(4) #= 500.U
-      dut.io.din(5) #= 600.U
-      dut.io.din(6) #= 700.U
-      dut.io.din(7) #= 800.U
-      dut.clock.step()
-      dut.io.push #= 8.U
-      dut.io.pop #= 0.U
-      dut.io.din(0) #= 110.U
-      dut.io.din(1) #= 210.U
-      dut.io.din(2) #= 310.U
-      dut.io.din(3) #= 410.U
-      dut.io.din(4) #= 510.U
-      dut.io.din(5) #= 610.U
-      dut.io.din(6) #= 710.U
-      dut.io.din(7) #= 810.U
-      dut.clock.step()
-      dut.io.push #= 8.U
-      dut.io.pop #= 0.U
-      dut.io.din(0) #= 101.U
-      dut.io.din(1) #= 202.U
-      dut.io.din(2) #= 303.U
-      dut.io.din(3) #= 404.U
-      dut.io.din(4) #= 505.U
-      dut.io.din(5) #= 606.U
-      dut.io.din(6) #= 707.U
-      dut.io.din(7) #= 808.U
-      dut.clock.step()
-      dut.io.push #= 0.U
-      dut.io.pop #= 8.U
-      dut.clock.step()
-      dut.io.push #= 0.U
-      dut.io.pop #= 8.U
-      dut.clock.step()
-      dut.io.push #= 0.U
-      dut.io.pop #= 8.U
-      dut.clock.step()
-      dut.io.pop #= 3.U
-      dut.clock.step()
-      dut.io.pop #= 1.U
-      dut.clock.step()
-      dut.io.push #= 0.U
-      dut.io.pop #= 0.U
-      dut.clock.step(5)        
+import scala.util.Random
+import scala.math._
+import chisel3.simulator.Simulator
+
+class XRegStackSimulator(n: Int, depthEach: Int) {
+  type Push = Int
+  type Pop = Int
+  val maxSize = n * depthEach
+
+  def step(stack: List[BigInt], push: Push, pop: Pop, din: List[BigInt]): List[BigInt] = {
+    assert(push == din.length, "length must match")
+    din ++ stack.drop(pop)
+  }
+
+  def opGen(stack: List[BigInt]): (Push, Pop) = {
+    val pop = Random.nextInt(min(n, stack.length + 1))
+    val push = Random.nextInt(min(n, maxSize - stack.length - pop + 1))
+    (push, pop)
+  }
+
+  def topElms(stack: List[BigInt]): List[BigInt] = stack.take(n)
+}
+
+class XRegStackSpec extends AnyFreeSpec {
+  "XRegStack should behave" in {
+    simulate(new XRegStack(8, 32, UInt(32.W))) { dut =>
+      val simulator = new XRegStackSimulator(8, 32)  
+
+      def run(n: Int, stack: List[BigInt], ops: List[(simulator.Push, simulator.Pop)]): Unit = {
+        val (newPush, newPop) = if (ops.isEmpty) simulator.opGen(stack) else ops.head
+        def dinBuilder(length: Int, acc: List[BigInt] = Nil): List[BigInt] =
+          if(length == 0) acc
+            else dinBuilder(length - 1, BigInt(Random.nextInt(Int.MaxValue)) :: acc)
+        val din = dinBuilder(newPush)
+        println(s"push: $newPush, pop: $newPop din: $din")
+        val newStack = simulator.step(stack, newPush, newPop, din)
+        val newTops = simulator.topElms(newStack)
+        dut.io.push.poke(newPush)
+        dut.io.pop.poke(newPop)
+        dut.io.din.zip(din).foreach{case(port, value) => port.poke(value)}
+        dut.clock.step()
+        dut.io.top.zip(newTops).foreach{case(port, value) => port.expect(value)}
+        println(s"simulator | tops: $newTops | depth: ${newStack.length}")
+        println(s"hardware  | tops: ${dut.io.top.map(_.peek().litValue)} | depth: ${dut.io.elms.peekValue()}")
+        println("pass.")
+        println("======================================================")
+        if(n > 1) {
+          run(n - 1, newStack, if(ops.isEmpty) Nil else ops.tail)
+        }
+      }
+
+      dut.clock.step(3)
+      run(200, Nil, Nil)
     }
   }
 }

@@ -1,94 +1,81 @@
 package common
 
 import chisel3._
-// import chisel3.simulator.EphemeralSimulator._
+import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.flatspec.AnyFlatSpec
-import tester._
 
-class RegStackSpec extends AnyFlatSpec with Matchers with VerilatorTestRunner{
-  val compiled = TestRunnerConfig(withWaveform = true, ephemeral = false).compile(new RegStack(32, UInt(8.W)))
-  "RegStack" should "behave" in {
-    compiled.runSim { dut =>
-      import TestRunnerUtils._
-      def idle: Unit = {
-        dut.io.opcode #= StackOpCode.idle
-        dut.clock.step()
-      }
+import scala.util.Random
 
-      def push(data: Int): Unit = {
-        dut.io.opcode #= StackOpCode.push
-        dut.io.din #= data
-        dut.clock.step()
-      }
+class RegStackSimulator(depth: Int) {
+  object opCode extends Enumeration {
+    val idle, push, pop, modify = Value
+  }
 
-      def pop: Unit = {
-        dut.io.opcode #= StackOpCode.pop
-        dut.clock.step()
-      }
-
-      def modify(data: Int): Unit = {
-        dut.io.opcode  #= StackOpCode.modify
-        dut.io.din  #= data
-        dut.clock.step()
-      }
-
-      dut.clock.step(5)
-      push(16)
-      push(4)
-      idle
-      push(8)
-      pop
-      pop
-      modify(3)
-      idle
-      push(9)
-      pop
-      pop
-      idle
-      dut.clock.step(5)        
+  def step(stack: List[BigInt], op: opCode.Value, din: BigInt): List[BigInt] = {
+    (op, stack) match {
+      case (opCode.idle, s) => s
+      case (opCode.push, s) => din :: s
+      case (opCode.pop, top :: s) => s
+      case (opCode.modify, top :: s) => din :: s
+      case _ => throw new RuntimeException("! ILLEGAL OPERATION !")
     }
   }
-  // "RegStack should behave" in {
-  //   simulate(new RegStack(32, UInt(8.W))) { dut =>
-      
-  //     def idle: Unit = {
-  //       dut.io.opcode.poke(StackOpCode.idle)
-  //       dut.clock.step()
-  //     }
 
-  //     def push(data: Int): Unit = {
-  //       dut.io.opcode.poke(StackOpCode.push)
-  //       dut.io.din.poke(data)
-  //       dut.clock.step()
-  //     }
+  def opCodeGen(stack: List[BigInt]): opCode.Value = {
+    import opCode._
+    if(stack.length == 0) {
+      if (Random.nextInt(10) < 7) push else idle
+    } else if (stack.length < depth / 2) {
+      if (Random.nextInt(10) < 7) push else 
+        Seq(idle, pop, modify)(Random.nextInt(3))
+    } else if (stack.length < depth) {
+      Seq(idle, push, pop, modify)(Random.nextInt(4))
+    } else {
+      Seq(idle, pop, modify)(Random.nextInt(3))
+    }
+  }
 
-  //     def pop: Unit = {
-  //       dut.io.opcode.poke(StackOpCode.pop)
-  //       dut.clock.step()
-  //     }
+  def top(stack: List[BigInt]): BigInt = 
+    stack match {
+      case head :: next => head
+      case Nil => 0
+    }
+}
 
-  //     def modify(data: Int): Unit = {
-  //       dut.io.opcode.poke(StackOpCode.modify)
-  //       dut.io.din.poke(data)
-  //       dut.clock.step()
-  //     }
+class RegStackSpec extends AnyFreeSpec {
+  "Stack should behave" in {
+    simulate(new RegStack(64, UInt(32.W))) { dut =>
+      val simulator = new RegStackSimulator(64)  
 
-  //     dut.clock.step(5)
-  //     push(16)
-  //     push(4)
-  //     idle
-  //     push(8)
-  //     pop
-  //     pop
-  //     modify(3)
-  //     idle
-  //     push(9)
-  //     pop
-  //     pop
-  //     idle
-  //     dut.clock.step(5)
-  //   }
-  // }
+      def run(n: Int, stack: List[BigInt], ops: List[simulator.opCode.Value] = Nil): Unit = {
+        val din = BigInt(Random.nextInt(Int.MaxValue))
+        val newOp = if (ops.isEmpty) simulator.opCodeGen(stack) else ops.head
+        println(s"op: $newOp, din: $din")
+        val newStack = simulator.step(stack, newOp, din)
+        val newTop = simulator.top(newStack)
+        dut.io.opcode.poke(
+          newOp match {
+            case simulator.opCode.idle => StackOpCode.idle
+            case simulator.opCode.push => StackOpCode.push
+            case simulator.opCode.pop => StackOpCode.pop
+            case simulator.opCode.modify => StackOpCode.modify
+          }
+        )
+        dut.io.din.poke(din)
+        dut.clock.step()
+        dut.io.top.expect(newTop)
+        println(s"simulator | top: $newTop | depth: ${newStack.length}")
+        println(s"hardware  | top: ${dut.io.top.peekValue()} | depth: ${dut.io.elms.peekValue()}")
+        println("pass.")
+        println("======================================================")
+        if(n > 1) {
+          run(n - 1, newStack, if(ops.isEmpty) Nil else ops.tail)
+        }
+      }
+
+      dut.clock.step(3)
+      import simulator.opCode._
+      run(200, Nil, Nil)
+    }
+  }
 }
