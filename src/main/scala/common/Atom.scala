@@ -38,3 +38,7 @@ class Atom extends Bundle {
   val atomType = AtomType()
   val payload = Bits(atomPayloadSize.W)
 }
+
+class Apps extends Bundle {
+  val app = Vec(maxAppLength, new Atom)
+}

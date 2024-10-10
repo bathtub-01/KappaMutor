@@ -7,6 +7,8 @@ import chisel3.util._
     Vivado to infer memory as BRAM instead of LUT RAM.
 */
 
+// TODO: unify memory port difinition for different types of memories
+
 class MemIOBundle[T <: Data](depth: Int, t: T) extends Bundle {
   val rdAddr = Input(UInt(log2Ceil(depth).W))
   val rdData = Output(t)
@@ -54,4 +56,8 @@ class BlockMemROM[T <: Data](depth: Int, t: T) extends Module {
   ???
 }
 
-// TODO: to implement a dual-readwrite port memory, check https://www.chisel-lang.org/docs/explanations/memories#sram
+// Multiple port memory, check https://www.chisel-lang.org/docs/explanations/memories#sram
+class MultiPortBlockMem[T <: Data](n: Int, depth: Int, t: T) extends Module {
+  val io = IO(new SRAMInterface(depth, t, 0, 0, n))
+  io :<>= SRAM(depth, t, 0, 0 ,n)
+}
