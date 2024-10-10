@@ -11,6 +11,7 @@ import SystemConfig._
   COM: structured combinator
 */
 object AtomType extends ChiselEnum {
+  val NOP = Value
   val FUN = Value
   val PTR = Value
   val COM = Value
@@ -39,6 +40,12 @@ class Atom extends Bundle {
   val payload = Bits(atomPayloadSize.W)
 }
 
-class Apps extends Bundle {
-  val app = Vec(maxAppLength, new Atom)
+class Application extends Bundle {
+  val app = Vec(maxAppLen, new Atom)
+}
+
+class Template extends Bundle {
+  val spine = new Application
+  val appsNum = UInt(log2Ceil(maxAppsPerBody).W) // number of let-bindings
+  val apps = Vec(maxAppsPerBody - 1, new Application) // let-bindings
 }

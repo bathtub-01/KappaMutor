@@ -6,9 +6,12 @@ import chisel3.util._
 /* 
   atomSize: size of an Atom
   stackN: XRegStack
+
   comArity: maximum arity for structured combinator
   comPatter: patterns supported by structured combinator
   comIdxs: maximum de Brujin indexies in structured combinator
+
+
 */
 object SystemConfig {
   val atomSize = 32
@@ -18,7 +21,12 @@ object SystemConfig {
   val comPattern = 64
   val comIdxs = 6
 
-  val maxAppLength = 6
+  val maxSpineLen = 6 
+  val maxAppLen = 6
+  val maxAppsPerBody = 4 // spine included
+
+  val heapSize = 1024
+  val programMemSize = 256
 
   def atomPayloadSize = atomSize - AtomType.getWidth
 }

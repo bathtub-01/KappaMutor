@@ -48,12 +48,19 @@ class BlockMem[T <: Data](depth: Int, t: T) extends Module {
   }
 }
 
+class RomIO[T <: Data](depth: Int, t: T) extends Bundle {
+  val rdAddr = Input(UInt(log2Ceil(depth).W))
+  val rdData = Output(t)
+}
+
 /*  We use ROM (Vec) for program memory, this module has the same read/write
     timing as BlockMem.
 */
-class BlockMemROM[T <: Data](depth: Int, t: T) extends Module {
-  val io = IO(new MemIOBundle(depth, t))
-  ???
+class BlockMemRom[T <: Data](depth: Int, t: T)(bin: Seq[T]) extends Module {
+  val io = IO(new RomIO(depth, t))
+
+  val mem = VecInit(bin)
+  io.rdData := RegNext(mem(io.rdAddr))
 }
 
 // Multiple port memory, check https://www.chisel-lang.org/docs/explanations/memories#sram
