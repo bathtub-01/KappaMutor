@@ -21,12 +21,13 @@ object SystemConfig {
   val comPattern = 64
   val comIdxs = 6
 
-  val maxSpineLen = 6 
+  val maxSpineLen = 7
   val maxAppLen = 6
   val maxAppsPerBody = 4 // spine included
 
   val heapSize = 1024
   val programMemSize = 256
+  val stackSizeEach = 64
 
   def atomPayloadSize = atomSize - AtomType.getWidth
 }
