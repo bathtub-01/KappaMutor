@@ -25,7 +25,7 @@ object ExampleBins {
   val B: Atom = comBuilder(3, 1, List(0, 1, 2)) // X(XX)
   val S: Atom = comBuilder(3, 2, List(0, 2, 1, 2)) // (XX)(XX)
 
-  // SIII(BKK)(II)I(III)
+  // SIII(BKK)(II)I(III) - example without let-bindings
   val prog1: Bin = Seq(
     templateBuilder(
       appBuilder(funBuilder(1), funBuilder(2), funBuilder(3), I, funBuilder(4)),
@@ -45,6 +45,22 @@ object ExampleBins {
     ),
     templateBuilder(
       appBuilder(I, I, I),
+      0
+    )
+  )
+
+  // B(SIII)(K(II)S)((BKK)(II)I(III)) - example with multiple let-bindings (pipeline needed)
+  
+
+  // SII((BKK)III) - example of re-computation (need heap update)
+  val prog3: Bin = Seq(
+    templateBuilder(
+      appBuilder(S, I, I, ptrBuilder(0)),
+      1,
+      appBuilder(funBuilder(1), I, I, I)
+    ),
+    templateBuilder(
+      appBuilder(B, K, K),
       0
     )
   )

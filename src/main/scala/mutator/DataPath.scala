@@ -23,7 +23,7 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  val programMem = Module(new ProgramMem(ExampleBins.prog1))
+  val programMem = Module(new ProgramMem(ExampleBins.prog3))
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
@@ -107,7 +107,7 @@ class DataPath extends Module {
         preFetch(app.app(0).payload)
       }
       is(AtomType.COM) {
-        // FIXME: support REAL structured combinator
+        // TODO: support REAL structured combinator
         val comPayload: ComPayload = reductionStk.io.top(0).payload.asTypeOf(new ComPayload)
         when(comPayload.arity === 1.U) { // I
           reductionStk.io.pop := 2.U
