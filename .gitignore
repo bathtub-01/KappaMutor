@@ -346,10 +346,10 @@ hs_err_pid*
 .bloop
 
 # chisel generated files
-generated/
+sv-gen/
 
 # chisel testing files
-generated-test/
+test-gen/
 
 # simulation output
 simu-out/

@@ -53,7 +53,7 @@ object ExampleBins {
 object ProgramMem extends App {
   ChiselStage.emitSystemVerilogFile(
     new ProgramMem(ExampleBins.prog1),
-    Array("--target-dir", "generated"),
+    Array("--target-dir", "sv-gen"),
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"),
   )
 }

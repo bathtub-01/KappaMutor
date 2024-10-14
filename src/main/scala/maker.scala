@@ -6,5 +6,5 @@ import circt.stage.ChiselStage
 import gcd._
 
 object VerilogMain extends App {
-  ChiselStage.emitSystemVerilogFile(new GCD, Array("--target-dir", "generated"))
+  ChiselStage.emitSystemVerilogFile(new GCD, Array("--target-dir", "sv-ven"))
 }

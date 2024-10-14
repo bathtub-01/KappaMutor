@@ -15,7 +15,7 @@ class Heap extends Module {
 object Heap extends App {
   ChiselStage.emitSystemVerilogFile(
     new Heap,
-    Array("--target-dir", "generated"),
+    Array("--target-dir", "sv-gen"),
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"),
   )
 }

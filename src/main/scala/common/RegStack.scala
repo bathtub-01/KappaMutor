@@ -109,7 +109,7 @@ class RegStack[T <: Data](depth: Int, t: T) extends Module {
 object RegStack extends App {
   ChiselStage.emitSystemVerilogFile(
     new RegStack(32, UInt(16.W)),
-    Array("--target-dir", "generated"),
+    Array("--target-dir", "sv-gen"),
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"),
   )
 }

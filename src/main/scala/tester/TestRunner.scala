@@ -33,7 +33,7 @@ trait TestRunner[B <: Backend] {
     */
   case class TestRunnerConfig(
     withWaveform: Boolean = false,
-    testRunDirPath: String = "generated-test",
+    testRunDirPath: String = "test-gen",
     ephemeral: Boolean = true
   ) {
     if (withWaveform) {

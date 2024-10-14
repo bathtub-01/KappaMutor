@@ -1,7 +1,7 @@
 .PHONY: clean
 
-clean-verilog:
-	rm -f ./generated/*
+sv-clean:
+	rm -f ./sv-gen/*
 
-clean-test:
-	rm -f -r ./generated-test/*
+test-clean:
+	rm -f -r ./test-gen/*

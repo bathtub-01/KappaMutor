@@ -33,6 +33,12 @@ object Helper {
       _.atomType -> AtomType.PTR,
       _.payload -> pointer.U
     )
+  
+  def ptrBuilder(pointer: UInt): Atom =
+    (new Atom).Lit(
+      _.atomType -> AtomType.PTR,
+      _.payload -> pointer
+    )
     
   def comBuilder(arity: Int, pattern: Int, idxs: List[Int]): Atom = 
     (new Atom).Lit(
