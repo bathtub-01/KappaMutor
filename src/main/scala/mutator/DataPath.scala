@@ -32,7 +32,9 @@ class DataPath extends Module {
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
-  val pipelineReg = RegInit(0.U.asTypeOf(new PipelineRegBundle))
+  // val pipelineReg = RegInit(0.U.asTypeOf(new PipelineRegBundle))
+  val needWrite = RegInit(false.B)
+  val pipelineReg = RegInit(0.U.asTypeOf(new Application))
 
   def atomCount(app: Vec[Atom]): UInt = { // maybe look at Vec.lastIndexWhere?
     app.count(atom => atom.atomType =/= AtomType.NOP)
@@ -56,6 +58,18 @@ class DataPath extends Module {
     }
     VecInit(app.map(red))
   }
+  def ptrRedirect(app: Application): Application = {
+    val wires = Wire(new Application)
+    app.app.zip(wires.app)foreach{case (atom, wire) => 
+      wire.atomType := atom.atomType
+      when(atom.atomType === AtomType.PTR) {
+        wire.payload := atom.payload + heapBumper
+      }.otherwise {
+        wire.payload := atom.payload
+      }
+    }
+    wires
+  }
 
   def heapWrite(port: MemoryReadWritePort[Application], wData: Application, wAddr: UInt): Unit = {
     port.enable := true.B
@@ -65,8 +79,8 @@ class DataPath extends Module {
   }
 
   def pushPipeline(data: Application): Unit = {
-    pipelineReg.app := data
-    pipelineReg.needWrite := true.B
+    pipelineReg := data
+    needWrite := true.B
   }
 
   // ============= initialization =====================
@@ -105,43 +119,42 @@ class DataPath extends Module {
         // =========== stack update ============
         val template = programMem.io.rdData
         val spine = template.spine
-        val newSpine = ptrRedirect(spine.app)
+        val newSpine = ptrRedirect(spine)
         def stackUpdate() = {
           reductionStk.io.pop := 1.U
           reductionStk.io.push := atomCount(spine.app)
-          reductionStk.io.din.zip(newSpine).foreach{case(port, a) => port := a}
+          reductionStk.io.din.zip(newSpine.app).foreach{case(port, a) => port := a}
         }
         // =========== heap writing ============
         when(template.appsNum === 0.U) { // not stalled
           stackUpdate()
-          heapWrite(heap.io.readwritePorts(1), template.apps(0), heapBumper)
-          heapBumper := heapBumper + 1.U
-          preFetch(newSpine(0).payload)
-        }.elsewhen(pipelineReg.needWrite) { // stalled
-          programMem.io.rdAddr := newSpine(0).payload // keep the assumption
+          preFetch(newSpine.app(0).payload)
+        }.elsewhen(needWrite) { // stalled
+          programMem.io.rdAddr := newSpine.app(0).payload // keep the assumption
+          // pipelinedWrite()
         }.otherwise { // stall relaese
           // assume: two heap ports are free to use
           when(template.appsNum === 1.U) { 
             stackUpdate()
-            heapWrite(heap.io.readwritePorts(1), template.apps(0), heapBumper)
+            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
             heapBumper := heapBumper + 1.U
-            preFetch(newSpine(0).payload)
+            preFetch(newSpine.app(0).payload)
           }.elsewhen(template.appsNum === 2.U) {
             stackUpdate()
-            heapWrite(heap.io.readwritePorts(1), template.apps(0), heapBumper)
+            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
             heapBumper := heapBumper + 1.U
             pushPipeline(template.apps(1))
           }.otherwise { // template.appsNum === 3.U
             stackUpdate()
-            heapWrite(heap.io.readwritePorts(0), template.apps(0), heapBumper)
-            heapWrite(heap.io.readwritePorts(1), template.apps(1), heapBumper + 1.U)
+            heapWrite(heap.io.readwritePorts(0), ptrRedirect(template.apps(0)), heapBumper)
+            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(1)), heapBumper + 1.U)
             heapBumper := heapBumper + 2.U
             pushPipeline(template.apps(2))
-          }          
+          }
         }
       }
       is(AtomType.PTR) { // assume: heap data is ready for read
-        when(!pipelineReg.needWrite) {
+        when(!needWrite) {
           val app = heap.io.readwritePorts(0).readData
           reductionStk.io.pop := 1.U
           reductionStk.io.push := atomCount(app.app)
@@ -152,6 +165,8 @@ class DataPath extends Module {
           heap.io.readwritePorts(0).enable := true.B
           heap.io.readwritePorts(0).isWrite := false.B
           heap.io.readwritePorts(0).address := reductionStk.io.top(0).payload
+
+          // pipelinedWrite()
         }
       }
       is(AtomType.COM) {
@@ -167,7 +182,7 @@ class DataPath extends Module {
           reductionStk.io.push := 1.U
           reductionStk.io.din(0) := reductionStk.io.top(1)
           preFetch(reductionStk.io.top(1).payload)
-        }.elsewhen(pipelineReg.needWrite) { // stalled
+        }.elsewhen(needWrite) { // stalled
           // don't need maintainance reading...
         }.otherwise { // stall release
           when(comPayload.arity === 3.U && comPayload.pattern === 1.U) { // B
@@ -204,15 +219,15 @@ class DataPath extends Module {
     }
   }
   
-  // def pipelinedWrite() = {
-  //   heapWrite(heap.io.readwritePorts(1), pipelineReg.app, heapBumper)
-  //   heapBumper := heapBumper + 1.U
-  //   pipelineReg.needWrite := false.B
-  // }
-  when(pipelineReg.needWrite) { // second-stage logic, maintianance reading is not handled here
-    heapWrite(heap.io.readwritePorts(1), pipelineReg.app, heapBumper)
+  def pipelinedWrite() = {
+    heapWrite(heap.io.readwritePorts(1), pipelineReg, heapBumper)
     heapBumper := heapBumper + 1.U
-    pipelineReg.needWrite := false.B
+    needWrite := false.B
+  }
+  when(needWrite) { // second-stage logic, maintianance reading is not handled here
+    heapWrite(heap.io.readwritePorts(1), pipelineReg, heapBumper)
+    heapBumper := heapBumper + 1.U
+    needWrite := false.B
   }
   // ==================================================
 

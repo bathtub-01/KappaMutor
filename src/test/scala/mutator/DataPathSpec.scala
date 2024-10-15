@@ -13,8 +13,8 @@ class DataPathSpec extends AnyFreeSpec {
       dut.io.start.poke(false)
 
       for(i <- 0 until 80) {
-        println(s"tops: ${dut.io.stkTops(0).atomType.peekValue()}")
-        println(s"depth: ${dut.io.stkElms.peekValue()} | done: ${dut.io.done.peekValue()}")
+        println(s"top.type: ${dut.io.stkTops(0).atomType.peekValue()} | top.payload: ${dut.io.stkTops(0).payload.peek().litValue}")
+        println(s"depth: ${dut.io.stkElms.peek().litValue} | done: ${dut.io.done.peek().litValue}")
         println("======================================================")
         dut.clock.step()
       }
