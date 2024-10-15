@@ -15,7 +15,7 @@ class DataPathWave extends AnyFlatSpec with Matchers with VerilatorTestRunner{
       dut.io.start #= true.B
       dut.clock.step()
       dut.io.start #= false.B
-      dut.clock.step(50)
+      dut.clock.step(100)
     }
   }
 }

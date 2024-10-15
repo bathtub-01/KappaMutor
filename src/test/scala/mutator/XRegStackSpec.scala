@@ -6,7 +6,6 @@ import org.scalatest.freespec.AnyFreeSpec
 
 import scala.util.Random
 import scala.math._
-import chisel3.simulator.Simulator
 
 class XRegStackSimulator(n: Int, depthEach: Int) {
   type Push = Int

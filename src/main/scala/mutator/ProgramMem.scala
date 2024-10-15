@@ -50,7 +50,28 @@ object ExampleBins {
   )
 
   // B(SIII)(K(II)S)((BKK)(II)I(III)) - example with multiple let-bindings (pipeline needed)
-  
+  val prog2: Bin = Seq(
+    templateBuilder(
+      appBuilder(B, funBuilder(1), funBuilder(2), funBuilder(3)),
+      0
+    ),
+    templateBuilder(
+      appBuilder(S, I, I, I),
+      0
+    ),
+    templateBuilder(
+      appBuilder(K, ptrBuilder(0), S),
+      1,
+      appBuilder(I, I)
+    ),
+    templateBuilder(
+      appBuilder(ptrBuilder(0), ptrBuilder(1), I, ptrBuilder(2)),
+      3,
+      appBuilder(B, K, K),
+      appBuilder(I, I),
+      appBuilder(I, I, I)
+    )
+  )
 
   // SII((BKK)III) - example of re-computation (need heap update)
   val prog3: Bin = Seq(

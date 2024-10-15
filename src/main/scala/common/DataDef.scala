@@ -46,6 +46,6 @@ class Application extends Bundle {
 
 class Template extends Bundle {
   val spine = new Application
-  val appsNum = UInt(log2Ceil(maxAppsPerBody).W) // number of let-bindings
+  val appsNum = UInt(log2Ceil(maxAppsPerBody - 1).W) // number of let-bindings
   val apps = Vec(maxAppsPerBody - 1, new Application) // let-bindings
 }
