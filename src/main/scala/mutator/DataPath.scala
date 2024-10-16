@@ -48,7 +48,7 @@ class DataPath extends Module {
       heap.io.readwritePorts(0).address := addr
       programMem.io.rdAddr := addr
   }
-
+  
   def ptrRedirect(app: Vec[Atom]): Vec[Atom] = {
     def red(atom: Atom): Atom = {
       if(atom.atomType == AtomType.PTR)
