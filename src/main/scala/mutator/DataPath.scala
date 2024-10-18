@@ -41,12 +41,12 @@ class DataPath extends Module {
   }
 
   def preFetch(addr: UInt): Unit = {
-      // pre-fetch to maintain the assumption
-      // always pre-fetch at heap port 0
-      heap.io.readwritePorts(0).enable := true.B
-      heap.io.readwritePorts(0).isWrite := false.B
-      heap.io.readwritePorts(0).address := addr
-      programMem.io.rdAddr := addr
+    // pre-fetch to maintain the assumption
+    // always pre-fetch at heap port 0
+    heap.io.readwritePorts(0).enable := true.B
+    heap.io.readwritePorts(0).isWrite := false.B
+    heap.io.readwritePorts(0).address := addr
+    programMem.io.rdAddr := addr
   }
   
   def ptrRedirect(app: Vec[Atom]): Vec[Atom] = {
@@ -131,7 +131,6 @@ class DataPath extends Module {
           preFetch(newSpine.app(0).payload)
         }.elsewhen(needWrite) { // stalled
           programMem.io.rdAddr := newSpine.app(0).payload // keep the assumption
-          // pipelinedWrite()
         }.otherwise { // stall relaese
           // assume: two heap ports are free to use
           when(template.appsNum === 1.U) { 
@@ -165,12 +164,10 @@ class DataPath extends Module {
           heap.io.readwritePorts(0).enable := true.B
           heap.io.readwritePorts(0).isWrite := false.B
           heap.io.readwritePorts(0).address := reductionStk.io.top(0).payload
-
-          // pipelinedWrite()
         }
       }
       is(AtomType.COM) {
-        // TODO: support REAL structured combinator
+        // TODO support REAL structured combinator
         val comPayload: ComPayload = reductionStk.io.top(0).payload.asTypeOf(new ComPayload)
         when(comPayload.arity === 1.U) { // I
           reductionStk.io.pop := 2.U
@@ -219,11 +216,6 @@ class DataPath extends Module {
     }
   }
   
-  def pipelinedWrite() = {
-    heapWrite(heap.io.readwritePorts(1), pipelineReg, heapBumper)
-    heapBumper := heapBumper + 1.U
-    needWrite := false.B
-  }
   when(needWrite) { // second-stage logic, maintianance reading is not handled here
     heapWrite(heap.io.readwritePorts(1), pipelineReg, heapBumper)
     heapBumper := heapBumper + 1.U
