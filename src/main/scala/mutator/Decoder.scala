@@ -3,6 +3,7 @@ package mutator
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.decode._
+import chisel3.experimental.BundleLiterals._
 import _root_.circt.stage.ChiselStage
 
 import common._
@@ -21,6 +22,28 @@ import common.Helper._
  testing and future compiling ;)
  */
 
+case class ComPattern(val pat: Pattern, val code: BigInt) extends DecodePattern {
+  def bitPat: BitPat = BitPat("b" + code.toString(2))
+}
+
+object ComPatterns {
+  import Patterns._
+  val allPossibleInputs: Seq[ComPattern] =
+    allPatterns.zip(0 until 64).map{ case(pat, i) =>
+      ComPattern(pat, BigInt(i))
+    }
+}
+
+class Element extends Bundle {
+  val typ = Bool() // 0 - argument; 1 - pointer
+  val idx = UInt(3.W) // FIXME: parameterize this
+}
+
+class Spine(spine: List[(Bool, Int)]) extends DecodeField[ComPattern, Vec[Element]] {
+  def name = "" 
+  def chiselType: Vec[Element] = Vec(6, new Element)
+  def genTable(i: ComPattern): BitPat = BitPat((new Element).asUInt)
+}
 
 // case class Pattern(val name: String, val code: BigInt/* my pattern abstraction might be here */) extends DecodePattern {
 //   def bitPat: BitPat = BitPat("b" + code.toString(2))
