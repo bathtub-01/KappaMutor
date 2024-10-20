@@ -9,11 +9,6 @@ import common._
 import common.SystemConfig._
 import common.Helper._
 
-class PipelineRegBundle extends Bundle {
-  val needWrite = Bool()
-  val app = new Application
-}
-
 class DataPath extends Module {
   val io = IO(new Bundle {
     val start = Input(Bool())
@@ -29,10 +24,10 @@ class DataPath extends Module {
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
   val programMem = Module(new ProgramMem(ExampleBins.prog2))
+  val decoder = Module(new Decoder)
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
-  // val pipelineReg = RegInit(0.U.asTypeOf(new PipelineRegBundle))
   val needWrite = RegInit(false.B)
   val pipelineReg = RegInit(0.U.asTypeOf(new Application))
 
@@ -90,13 +85,14 @@ class DataPath extends Module {
   reductionStk.io.din.foreach(p => p := nopBuilder)
   heap.io.readwritePorts(0).enable := false.B
   heap.io.readwritePorts(0).address := 0.U
-  heap.io.readwritePorts(0).writeData := DontCare
+  heap.io.readwritePorts(0).writeData := 0.U.asTypeOf(new Application)
   heap.io.readwritePorts(0).isWrite:= false.B
   heap.io.readwritePorts(1).enable := false.B
   heap.io.readwritePorts(1).address := 0.U
-  heap.io.readwritePorts(1).writeData := DontCare
+  heap.io.readwritePorts(1).writeData := 0.U.asTypeOf(new Application)
   heap.io.readwritePorts(1).isWrite:= false.B
   programMem.io.rdAddr := 0.U
+  decoder.in := DontCare
 
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
@@ -132,23 +128,21 @@ class DataPath extends Module {
         }.elsewhen(needWrite) { // stalled
           programMem.io.rdAddr := newSpine.app(0).payload // keep the assumption
         }.otherwise { // stall relaese
+          stackUpdate()
           // assume: two heap ports are free to use
           when(template.appsNum === 1.U) { 
-            stackUpdate()
             heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
             heapBumper := heapBumper + 1.U
             preFetch(newSpine.app(0).payload)
           }.elsewhen(template.appsNum === 2.U) {
-            stackUpdate()
             heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
             heapBumper := heapBumper + 1.U
-            pushPipeline(template.apps(1))
+            pushPipeline(ptrRedirect(template.apps(1)))
           }.otherwise { // template.appsNum === 3.U
-            stackUpdate()
             heapWrite(heap.io.readwritePorts(0), ptrRedirect(template.apps(0)), heapBumper)
             heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(1)), heapBumper + 1.U)
             heapBumper := heapBumper + 2.U
-            pushPipeline(template.apps(2))
+            pushPipeline(ptrRedirect(template.apps(2)))
           }
         }
       }
@@ -167,49 +161,67 @@ class DataPath extends Module {
         }
       }
       is(AtomType.COM) {
-        // TODO support REAL structured combinator
         val comPayload: ComPayload = reductionStk.io.top(0).payload.asTypeOf(new ComPayload)
-        when(comPayload.arity === 1.U) { // I
-          reductionStk.io.pop := 2.U
-          reductionStk.io.push := 1.U
-          reductionStk.io.din(0) := reductionStk.io.top(1) 
-          preFetch(reductionStk.io.top(1).payload)
-        }.elsewhen(comPayload.arity === 2.U) { // K
-          reductionStk.io.pop := 3.U
-          reductionStk.io.push := 1.U
-          reductionStk.io.din(0) := reductionStk.io.top(1)
-          preFetch(reductionStk.io.top(1).payload)
-        }.elsewhen(needWrite) { // stalled
-          // don't need maintainance reading...
-        }.otherwise { // stall release
-          when(comPayload.arity === 3.U && comPayload.pattern === 1.U) { // B
-            reductionStk.io.pop := 4.U
-            reductionStk.io.push := 2.U
-            reductionStk.io.din(0) := reductionStk.io.top(1)
-            reductionStk.io.din(1).atomType := AtomType.PTR
-            reductionStk.io.din(1).payload := heapBumper
-            heap.io.readwritePorts(1).enable := true.B
-            heap.io.readwritePorts(1).isWrite := true.B
-            heap.io.readwritePorts(1).writeData.app(0) := reductionStk.io.top(2)
-            heap.io.readwritePorts(1).writeData.app(1) := reductionStk.io.top(3)
-            heap.io.readwritePorts(1).address := heapBumper
-            heapBumper := heapBumper + 1.U
-            preFetch(reductionStk.io.top(1).payload)
-          }.elsewhen(comPayload.arity === 3.U && comPayload.pattern === 2.U) { // S
-            reductionStk.io.pop := 4.U
-            reductionStk.io.push := 3.U
-            reductionStk.io.din(0) := reductionStk.io.top(1)
-            reductionStk.io.din(1) := reductionStk.io.top(3)
-            reductionStk.io.din(2).atomType := AtomType.PTR
-            reductionStk.io.din(2).payload := heapBumper
-            heap.io.readwritePorts(1).enable := true.B
-            heap.io.readwritePorts(1).isWrite := true.B
-            heap.io.readwritePorts(1).writeData.app(0) := reductionStk.io.top(2)
-            heap.io.readwritePorts(1).writeData.app(1) := reductionStk.io.top(3)
-            heap.io.readwritePorts(1).address := heapBumper
-            heapBumper := heapBumper + 1.U 
-            preFetch(reductionStk.io.top(1).payload)
+        decoder.in := comPayload.pattern
+        val spineValid = decoder.spine.count(_.idx =/= 0b111.U)
+        val app1Valid = decoder.app1.count(_.idx =/= 0b111.U)
+        val app2Valid = decoder.app2.count(_.idx =/= 0b111.U)
+        val app3Valid = decoder.app3.count(_.idx =/= 0b111.U)
+
+        def translates(e: mutator.Element): Atom = {
+          val wire = Wire(new Atom)
+          when(e.typ) { // PTR
+            wire.atomType := AtomType.PTR
+            wire.payload := e.idx + heapBumper
+          }.otherwise { // ARG
+            when(e.idx === 0b111.U) {
+              wire := 0.U.asTypeOf(new Atom)
+            }.otherwise {
+              wire := reductionStk.io.top(comPayload.idxs(e.idx) + 1.U)
+            } 
           }
+          wire
+        }
+
+        def translate(es: Vec[mutator.Element]): Application = {
+          val wires = Wire(new Application)
+          wires := 0.U.asTypeOf(new Application)
+          es.zip(wires.app).foreach{ case(e, wire) =>
+            wire := translates(e)
+          }
+          wires
+        }
+
+        def stackUpdate(): Unit = {
+          reductionStk.io.pop := comPayload.arity + 1.U
+          reductionStk.io.push := spineValid
+          reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
+        }
+
+        when(app1Valid === 0.U) {
+          stackUpdate()
+          preFetch(reductionStk.io.din(0).payload)
+        }.elsewhen(needWrite) {
+          // stalled, don't need maintainance reading
+        }.elsewhen(app2Valid === 0.U) {
+          // spine + app1
+          stackUpdate()
+          heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
+          heapBumper := heapBumper + 1.U
+          preFetch(reductionStk.io.din(0).payload)
+        }.elsewhen(app3Valid === 0.U) {
+          // spine + app1 + app2
+          stackUpdate()
+          heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
+          heapBumper := heapBumper + 1.U
+          pushPipeline(translate(decoder.app2))
+        }.otherwise {
+          // spine + app1 + app2 + app3
+          stackUpdate()
+          heapWrite(heap.io.readwritePorts(0), translate(decoder.app1), heapBumper)
+          heapWrite(heap.io.readwritePorts(1), translate(decoder.app2), heapBumper + 1.U)
+          heapBumper := heapBumper + 2.U
+          pushPipeline(translate(decoder.app3))
         }
       }
       is(AtomType.NOP) {/* do nothing */}

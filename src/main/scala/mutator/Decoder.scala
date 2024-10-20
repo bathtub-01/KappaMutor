@@ -35,7 +35,7 @@ object ComPatterns {
 }
 
 class Element extends Bundle {
-  val typ = Bool() // 0 - argument; 1 - pointer
+  val typ = Bool() // false - argument; true - pointer
   val idx = UInt(3.W) // FIXME: parameterize this
 }
 

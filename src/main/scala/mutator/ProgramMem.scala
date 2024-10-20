@@ -22,8 +22,8 @@ object ExampleBins {
 
   val I: Atom = comBuilder(1, 0, List(0)) // X
   val K: Atom = comBuilder(2, 0, List(0)) // X
-  val B: Atom = comBuilder(3, 1, List(0, 1, 2)) // X(XX)
-  val S: Atom = comBuilder(3, 2, List(0, 2, 1, 2)) // (XX)(XX)
+  val B: Atom = comBuilder(3, 3, List(0, 1, 2)) // X(XX)
+  val S: Atom = comBuilder(3, 6, List(0, 2, 1, 2)) // (XX)(XX)
 
   // SIII(BKK)(II)I(III) - example without let-bindings
   val prog1: Bin = Seq(
@@ -83,6 +83,16 @@ object ExampleBins {
     templateBuilder(
       appBuilder(B, K, K),
       0
+    )
+  )
+
+  // KIB((BKK)KII)SI
+  val prog4: Bin = Seq(
+    templateBuilder(
+      appBuilder(K, I, B, ptrBuilder(0), S, I),
+      2,
+      appBuilder(ptrBuilder(1), K, I, I),
+      appBuilder(B, K, K)
     )
   )
 }
