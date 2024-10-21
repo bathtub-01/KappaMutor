@@ -36,7 +36,7 @@ class XRegStackPort[T <: Data](n: Int, depthEach: Int, t: T) extends Bundle {
 
 
 class XRegStack[T <: Data](n: Int, depthEach: Int, t: T) extends Module {
-  require(n > 0 && (n & (n - 1)) == 0) // n better be the power of 2
+  require(n > 0 && (n & (n - 1)) == 0) // n must be the power of 2
   val io = IO(new XRegStackPort(n, depthEach, t))  
   val elms = Wire(UInt(log2Ceil(n * depthEach + 1).W))
   val subStks = Seq.fill(n)(Module(new RegStack(depthEach, t)))
@@ -46,6 +46,12 @@ class XRegStack[T <: Data](n: Int, depthEach: Int, t: T) extends Module {
   elms := subStkPorts.map(_.elms).reduce(_ +& _)
   io.elms := elms
 
+  // don't need this, Chisel compiler knows what to do when n is power of 2
+  def modN(i: UInt): UInt = {
+    val offset = log2Ceil(n) - 1
+    Cat(0.U(1.W), i(offset, 0))
+  }
+  
   def rotate(i: UInt, elms: UInt): UInt = (elms % n.U - i - 1.U) % n.U
 
   subStkPorts.foreach{port => port.din := 0.U.asTypeOf(t)}

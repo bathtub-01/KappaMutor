@@ -17,6 +17,26 @@ class ProgramMem(bin: Seq[Template]) extends Module {
   io :<>= rom.io
 }
 
+class ProgramMemExt extends Module {
+  val io = IO(new RomIO(programMemSize, new Template))
+  val extIO = IO(new MemIOBundle(programMemSize, new Template))
+  val extEn = IO(Input(Bool()))
+
+  val ram = Module(new BlockMem(programMemSize, new Template))
+
+  when(extEn){
+    extIO :<>= ram.io
+    io.rdData := 0.U.asTypeOf(new Template)
+  }.otherwise{
+    io.rdData := ram.io.rdData
+    ram.io.rdAddr := io.rdAddr
+    ram.io.wrEna := false.B
+    ram.io.wrAddr := DontCare
+    ram.io.wrData := DontCare
+    extIO := DontCare
+  }
+}
+
 object ExampleBins {
   type Bin = Seq[Template]
 
