@@ -40,10 +40,55 @@ class ProgramMemExt extends Module {
 object ExampleBins {
   type Bin = Seq[Template]
 
+  // Combinators used in MicroHS, 19 in total
   val I: Atom = comBuilder(1, 0, List(0)) // X
   val K: Atom = comBuilder(2, 0, List(0)) // X
   val B: Atom = comBuilder(3, 3, List(0, 1, 2)) // X(XX)
-  val S: Atom = comBuilder(3, 6, List(0, 2, 1, 2)) // (XX)(XX)
+  val S: Atom = comBuilder(3, 6, List(0, 2, 1, 2)) // XX(XX)
+  val C: Atom = comBuilder(3, 2, List(0, 2, 1)) // XXX
+  val Sp:Atom = comBuilder(4, 15, List(0, 1, 3, 2, 3)) // X(XX)(XX)
+  val Bp:Atom = comBuilder(4, 6, List(0, 1, 2, 3)) // XX(XX)
+  val Cp:Atom = comBuilder(4, 5, List(0, 1, 3, 2)) // X(XX)X
+  val A: Atom = comBuilder(2, 0, List(1)) // X
+  val U: Atom = comBuilder(2, 1, List(1, 0)) // XX
+  // val Y: Atom = ??? // let's see what we can do...
+  val Z: Atom = comBuilder(3, 1, List(0, 1)) // XX
+  val P: Atom = comBuilder(3, 2, List(2, 0, 1)) // XXX
+  val R: Atom = comBuilder(3, 2, List(1, 2, 0)) // XXX
+  val O: Atom = comBuilder(4, 2, List(3, 0, 1)) // XXX
+  val K2:Atom = comBuilder(3, 0, List(0)) // X
+  val K3:Atom = comBuilder(4, 0, List(0)) // X
+  val K4:Atom = comBuilder(5, 0, List(0)) // X
+  val CpB:Atom = comBuilder(4, 6, List(0, 2, 1, 3)) // XX(XX)
+
+  // C(CCp(PKA))A - the compiled boolean `and` function
+  // True - K; False - A; `and` True True
+  // Requires 12 or 8 cycles to execute, input dependant
+  val and1: Bin = Seq(
+    templateBuilder(
+      appBuilder(funBuilder(1), K, K),
+      0
+    ),
+    templateBuilder(
+      appBuilder(C, ptrBuilder(0), A),
+      2,
+      appBuilder(C, Cp, ptrBuilder(1)),
+      appBuilder(P, K, A)
+    )
+  )
+
+  // "optimized" `and` function
+  // require 7 or 5 cycles to execute, input dependant
+  val and2: Bin = Seq(
+    templateBuilder(
+      appBuilder(funBuilder(1), A, A),
+      0
+    ),
+    templateBuilder(
+      appBuilder(comBuilder(5, 12, List(3, 4, 0, 1, 2)), K, A, A),
+      0
+    )
+  )
 
   // SIII(BKK)(II)I(III) - example without let-bindings
   val prog1: Bin = Seq(
@@ -70,6 +115,7 @@ object ExampleBins {
   )
 
   // B(SIII)(K(II)S)((BKK)(II)I(III)) - example with multiple let-bindings (pipeline needed)
+  // B a b c = a (bc)
   val prog2: Bin = Seq(
     templateBuilder(
       appBuilder(B, funBuilder(1), funBuilder(2), funBuilder(3)),

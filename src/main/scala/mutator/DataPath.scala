@@ -15,8 +15,8 @@ class DataPath extends Module {
     val stkTops = Output((Vec(stackN, new Atom)))
     val stkElms = Output(UInt(log2Ceil(stackN * stackSizeEach + 1).W))
     val done = Output(Bool())
-    val extMemIO = new MemIOBundle(programMemSize, new Template)
-    val extMemEn = Input(Bool())
+    // val extMemIO = new MemIOBundle(programMemSize, new Template)
+    // val extMemEn = Input(Bool())
   })
   object StmState extends ChiselEnum {
     val idle = Value
@@ -25,8 +25,8 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  // val programMem = Module(new ProgramMem(ExampleBins.prog2))
-  val programMem = Module(new ProgramMemExt)
+  val programMem = Module(new ProgramMem(ExampleBins.and2))
+  // val programMem = Module(new ProgramMemExt)
   val decoder = Module(new Decoder)
 
   val stmReg = RegInit(StmState.idle)
@@ -95,8 +95,8 @@ class DataPath extends Module {
   heap.io.readwritePorts(1).writeData := 0.U.asTypeOf(new Application)
   heap.io.readwritePorts(1).isWrite:= false.B
   programMem.io.rdAddr := 0.U
-  programMem.extEn := io.extMemEn
-  programMem.extIO <> io.extMemIO
+  // programMem.extEn := io.extMemEn
+  // programMem.extIO <> io.extMemIO
   decoder.in := DontCare
 
   io.stkTops := reductionStk.io.top

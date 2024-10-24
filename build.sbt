@@ -12,7 +12,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.chipsalliance" %% "chisel" % chiselVersion,
       "org.scalatest" %% "scalatest" % "3.2.19" % "test",
-      "com.github.rameloni" %% "tywaves-chisel-api" % "0.4.1-SNAPSHOT"
+      "com.github.rameloni" %% "tywaves-chisel-api" % "0.4.2-SNAPSHOT"
     ),
     scalacOptions ++= Seq(
       "-language:reflectiveCalls",

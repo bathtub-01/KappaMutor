@@ -114,7 +114,7 @@ object Patterns {
 
 object Pattern extends App {
   import Patterns._
-  val pat = allPatterns(6)
+  val pat = allPatterns(12)
   println(pat)
   println(parse(pat)._1)
   println(":)")
