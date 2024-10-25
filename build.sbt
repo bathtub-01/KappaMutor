@@ -5,6 +5,7 @@ ThisBuild / version          := "0.1.0"
 ThisBuild / organization     := "com.github.bathtub01"
 
 val chiselVersion = "6.4.3-tywaves-SNAPSHOT"
+// val chiselVersion = "6.5.0"
 
 lazy val root = (project in file("."))
   .settings(

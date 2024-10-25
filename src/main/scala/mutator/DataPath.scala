@@ -25,9 +25,10 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  val programMem = Module(new ProgramMem(ExampleBins.and2))
+  val programMem = Module(new ProgramMem(ExampleBins.arith1))
   // val programMem = Module(new ProgramMemExt)
   val decoder = Module(new Decoder)
+  val alu = Module(new ALU(atomPayloadSize))
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
@@ -98,6 +99,9 @@ class DataPath extends Module {
   // programMem.extEn := io.extMemEn
   // programMem.extIO <> io.extMemIO
   decoder.in := DontCare
+  alu.io.fn := DontCare
+  alu.io.in1 := DontCare
+  alu.io.in2 := DontCare
 
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
@@ -229,6 +233,38 @@ class DataPath extends Module {
           pushPipeline(translate(decoder.app3))
         }
       }
+      is(AtomType.INT) {
+        val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
+        when(reductionStk.io.top(2).atomType === AtomType.INT) {
+          when(prmPayload.swap) {
+            alu.io.in1 := reductionStk.io.top(2).payload
+            alu.io.in2 := reductionStk.io.top(0).payload
+          }.otherwise {
+            alu.io.in1 := reductionStk.io.top(0).payload
+            alu.io.in2 := reductionStk.io.top(2).payload
+          }
+          alu.io.fn := prmPayload.fun
+          val result = Wire(new Atom)
+          result.atomType := AtomType.INT
+          result.payload := alu.io.out
+          reductionStk.io.pop := 3.U
+          reductionStk.io.push := 1.U
+          reductionStk.io.din(0) := result
+          // no prefetch needed
+        }.otherwise {
+          val newPrm = Wire(new PrmPayload)
+          newPrm.fun := prmPayload.fun
+          newPrm.swap := ~prmPayload.swap
+          reductionStk.io.pop := 3.U
+          reductionStk.io.push := 3.U
+          reductionStk.io.din(0) := reductionStk.io.top(2)
+          reductionStk.io.din(1).atomType := AtomType.PRM
+          reductionStk.io.din(1).payload := newPrm.asUInt
+          reductionStk.io.din(2) := reductionStk.io.top(0)
+          preFetch(reductionStk.io.din(0).payload)
+        }
+      }
+      is(AtomType.PRM) {/* PRM won't be showing at stack top */}
       is(AtomType.NOP) {/* do nothing */}
     }
   }
@@ -241,15 +277,23 @@ class DataPath extends Module {
   // ==================================================
 
   // ============= termination logic ==================
+  def stop(): Unit = {
+    stmReg := StmState.idle
+    reductionStk.io.push := 0.U
+    reductionStk.io.pop := 0.U
+    heap.io.readwritePorts(0).enable := false.B
+    heap.io.readwritePorts(1).enable := false.B
+    programMem.io.rdAddr := 0.U
+  }
+
   when(reductionStk.io.top(0).atomType === AtomType.COM) {
     val comPayload: ComPayload = reductionStk.io.top(0).payload.asTypeOf(new ComPayload)
     when(comPayload.arity + 1.U > reductionStk.io.elms) {
-      stmReg := StmState.idle
-      reductionStk.io.push := 0.U
-      reductionStk.io.pop := 0.U
-      heap.io.readwritePorts(0).enable := false.B
-      heap.io.readwritePorts(1).enable := false.B
-      programMem.io.rdAddr := 0.U
+      stop()
+    }
+  }.elsewhen(reductionStk.io.top(0).atomType === AtomType.INT) {
+    when(reductionStk.io.elms === 1.U) {
+      stop()
     }
   }
   // ==================================================

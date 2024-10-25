@@ -44,6 +44,37 @@ object Helper {
                                   0.U(log2Ceil(comArity + 1).W)): _*)
       ).asUInt
     )
+
+  def intBuilder(value: Int): Atom =
+    (new Atom).Lit(
+      _.atomType -> AtomType.INT,
+      _.payload -> (new IntPayload).Lit(
+        _.value -> value.S
+      ).asUInt
+    )
+
+  def prmBuilder(op: String): Atom = {
+    import mutator._
+    val (opCode, isSub, isCondInv) = op match {
+      case "+" => (ALUOpCode.add_sub, false.B, false.B)
+      case "-" => (ALUOpCode.add_sub, true.B, false.B)
+      case "*" => (ALUOpCode.mult, false.B, false.B)
+      // more to be added...
+      case _ => throw new IllegalArgumentException(s"Unknown operation: $op")
+    }
+
+    (new Atom).Lit(
+      _.atomType -> AtomType.PRM,
+      _.payload -> (new PrmPayload).Lit(
+        _.fun -> (new ALUFunction).Lit(
+          _.opcode -> opCode,
+          _.is_sub -> isSub,
+          _.is_cond_inv -> isCondInv
+        ),
+        _.swap -> false.B
+      ).asUInt
+    )
+  }
   
   def appBuilder(atoms: Atom*): Application = 
     (new Application).Lit(

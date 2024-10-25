@@ -81,7 +81,7 @@ object ExampleBins {
   // require 7 or 5 cycles to execute, input dependant
   val and2: Bin = Seq(
     templateBuilder(
-      appBuilder(funBuilder(1), A, A),
+      appBuilder(funBuilder(1), K, K),
       0
     ),
     templateBuilder(
@@ -159,6 +159,15 @@ object ExampleBins {
       2,
       appBuilder(ptrBuilder(1), K, I, I),
       appBuilder(B, K, K)
+    )
+  )
+
+  // arithmetic programs
+  val arith1: Bin = Seq(
+    templateBuilder(
+      appBuilder(intBuilder(3), prmBuilder("-"), ptrBuilder(0)),
+      1,
+      appBuilder(intBuilder(2), prmBuilder("*"), intBuilder(4))
     )
   )
 }

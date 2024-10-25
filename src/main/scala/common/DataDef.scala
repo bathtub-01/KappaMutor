@@ -15,6 +15,8 @@ object AtomType extends ChiselEnum {
   val FUN = Value
   val PTR = Value
   val COM = Value
+  val INT = Value
+  val PRM = Value
 }
 
 abstract class AtomPayload extends Bundle
@@ -33,6 +35,22 @@ class ComPayload extends AtomPayload {
   val arity = UInt(log2Ceil(comArity + 1).W)
   val pattern = UInt(log2Ceil(comPattern).W)
   val idxs = Vec(comIdxs, UInt(log2Ceil(comArity + 1).W))
+}
+
+/*  
+  Payload for INT, which only contains the value
+*/
+class IntPayload extends AtomPayload {
+  val value = SInt(atomPayloadSize.W)
+}
+
+/*  
+  Payload for PRM, contains the control information to ALU
+ */
+class PrmPayload extends AtomPayload {
+  import mutator.ALUFunction
+  val fun = new ALUFunction
+  val swap = Bool()
 }
 
 class Atom extends Bundle {
