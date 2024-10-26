@@ -25,10 +25,10 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  val programMem = Module(new ProgramMem(ExampleBins.arith1))
+  val programMem = Module(new ProgramMem(ExampleBins.fact))
   // val programMem = Module(new ProgramMemExt)
   val decoder = Module(new Decoder)
-  val alu = Module(new ALU(atomPayloadSize))
+  val alu = Module(new TypedALU)
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
@@ -235,7 +235,13 @@ class DataPath extends Module {
       }
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
-        when(reductionStk.io.top(2).atomType === AtomType.INT) {
+        when(reductionStk.io.top(1).atomType === AtomType.FUN) {
+          reductionStk.io.pop := 2.U
+          reductionStk.io.push := 2.U
+          reductionStk.io.din(0) := reductionStk.io.top(1)
+          reductionStk.io.din(1) := reductionStk.io.top(0)
+          preFetch(reductionStk.io.top(1).payload)
+        }.elsewhen(reductionStk.io.top(2).atomType === AtomType.INT) {
           when(prmPayload.swap) {
             alu.io.in1 := reductionStk.io.top(2).payload
             alu.io.in2 := reductionStk.io.top(0).payload
@@ -244,12 +250,9 @@ class DataPath extends Module {
             alu.io.in2 := reductionStk.io.top(2).payload
           }
           alu.io.fn := prmPayload.fun
-          val result = Wire(new Atom)
-          result.atomType := AtomType.INT
-          result.payload := alu.io.out
           reductionStk.io.pop := 3.U
           reductionStk.io.push := 1.U
-          reductionStk.io.din(0) := result
+          reductionStk.io.din(0) := alu.io.out
           // no prefetch needed
         }.otherwise {
           val newPrm = Wire(new PrmPayload)

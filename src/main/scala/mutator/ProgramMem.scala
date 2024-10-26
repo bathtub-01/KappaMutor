@@ -61,6 +61,47 @@ object ExampleBins {
   val K4:Atom = comBuilder(5, 0, List(0)) // X
   val CpB:Atom = comBuilder(4, 6, List(0, 2, 1, 3)) // XX(XX)
 
+  // hand-written factorial function
+  val fact: Bin = Seq(
+    templateBuilder(
+      appBuilder(funBuilder(1), intBuilder(20)),
+      0
+    ),
+    templateBuilder(
+      appBuilder(
+        comBuilder(4, 14, List(0, 3, 1, 2, 3)),
+        ptrBuilder(0), intBuilder(0), ptrBuilder(1)
+      ),
+      2,
+      appBuilder(comBuilder(3, 2, List(2, 0, 1)), prmBuilder("=="), intBuilder(0)),
+      appBuilder(
+        comBuilder(5, 26, List(0, 4, 2, 3, 1, 4)),
+        funBuilder(1), prmBuilder("+"), prmBuilder("-"),
+        intBuilder(1)
+      )
+    )
+  )
+
+  val factOpt: Bin = Seq(
+    templateBuilder(
+      appBuilder(funBuilder(1), intBuilder(20)),
+      0
+    ),
+    templateBuilder(
+      appBuilder(
+        comBuilder(4, 14, List(0, 3, 1, 2, 3)),
+        ptrBuilder(0), intBuilder(0), ptrBuilder(1)
+      ),
+      2,
+      appBuilder(comBuilder(3, 2, List(2, 0, 1)), prmBuilder("=="), intBuilder(0)),
+      appBuilder(
+        comBuilder(5, 23, List(4, 2, 3, 0, 1, 4)),
+        funBuilder(1), prmBuilder("+"), prmBuilder("-"),
+        intBuilder(1)
+      )
+    )
+  )
+
   // C(CCp(PKA))A - the compiled boolean `and` function
   // True - K; False - A; `and` True True
   // Requires 12 or 8 cycles to execute, input dependant

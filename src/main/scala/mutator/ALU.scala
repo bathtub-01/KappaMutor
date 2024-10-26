@@ -4,6 +4,9 @@ import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
 
+import common._
+import common.SystemConfig._
+
 /*  The implementation of ALU in this file is highly inspired by the rocket-chip project:
     https://github.com/chipsalliance/rocket-chip/blob/master/src/main/scala/rocket/ALU.scala
 */
@@ -70,6 +73,31 @@ class ALU(width: Int) extends Module {
   io.out := Mux(io.fn.opcode === ALUOpCode.add_sub, adder_out, cond_logic_sh_out)
   when(io.fn.opcode === ALUOpCode.mult) {
     io.out := (io.in1.asSInt * io.in2.asSInt).asUInt(width - 1, 0)
+  }
+}
+
+class TypedALU extends Module {
+  val io = IO(new Bundle {
+    val in1 = Input(Bits(atomPayloadSize.W))
+    val in2 = Input(Bits(atomPayloadSize.W))
+    val fn = Input(new ALUFunction)
+    val out = Output(new Atom)
+  })
+  val alu = Module(new ALU(atomPayloadSize))
+  alu.io.in1 := io.in1
+  alu.io.in2 := io.in2
+  alu.io.fn := io.fn
+
+  when(io.fn.opcode <= ALUOpCode.lt) {
+    // True - K, False - A
+    when(alu.io.out === 0.U) {
+      io.out := ExampleBins.A
+    }.otherwise {
+      io.out := ExampleBins.K
+    }
+  }.otherwise {
+    io.out.atomType := AtomType.INT
+    io.out.payload := alu.io.out
   }
 }
 

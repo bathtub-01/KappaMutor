@@ -1,0 +1,14 @@
+# AtomType - in binary
+000 NOP
+001 FUN
+010 PTR
+011 COM
+100 INT
+101 PRM
+
+# Primitives - in decimal
+4 ==
+72 *
+73 (*)
+68 -
+

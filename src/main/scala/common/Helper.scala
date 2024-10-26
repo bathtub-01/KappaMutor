@@ -59,6 +59,7 @@ object Helper {
       case "+" => (ALUOpCode.add_sub, false.B, false.B)
       case "-" => (ALUOpCode.add_sub, true.B, false.B)
       case "*" => (ALUOpCode.mult, false.B, false.B)
+      case "==" => (ALUOpCode.eq, true.B, false.B)
       // more to be added...
       case _ => throw new IllegalArgumentException(s"Unknown operation: $op")
     }
