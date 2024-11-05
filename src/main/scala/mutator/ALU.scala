@@ -89,11 +89,11 @@ class TypedALU extends Module {
   alu.io.fn := io.fn
 
   when(io.fn.opcode <= ALUOpCode.lt) {
-    // True - K, False - A
+    // True - A, False - K
     when(alu.io.out === 0.U) {
-      io.out := ExampleBins.A
-    }.otherwise {
       io.out := ExampleBins.K
+    }.otherwise {
+      io.out := ExampleBins.A
     }
   }.otherwise {
     io.out.atomType := AtomType.INT

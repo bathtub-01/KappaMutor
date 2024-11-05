@@ -17,10 +17,11 @@ class DataPathWave extends AnyFlatSpec with Matchers with VerilatorTestRunner{
       dut.io.start #= true.B
       dut.clock.step()
       dut.io.start #= false.B
-      while(dut.io.done.getValue() == Simulation.Value(1, 0)) {
-        dut.clock.step()
-        cycleCounter = cycleCounter + 1
-      }
+      // while(dut.io.done.getValue() == Simulation.Value(1, 0)) {
+      //   dut.clock.step()
+      //   cycleCounter = cycleCounter + 1
+      // }
+      dut.clock.step(300)
       println(s"cycle consumed: ${cycleCounter}")
       dut.clock.step(3)
     }

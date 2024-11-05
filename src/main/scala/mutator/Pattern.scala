@@ -6,7 +6,7 @@ case class X() extends Pattern {
 }
 case class At(p1: Pattern, p2: Pattern) extends Pattern {
   override def toString =
-    "(" ++ p1.toString ++ "," ++  p2.toString ++ ")"
+    "(" ++ p1.toString ++ p2.toString ++ ")"
 }
 
 object Patterns {
@@ -114,7 +114,7 @@ object Patterns {
 
 object Pattern extends App {
   import Patterns._
-  val pat = allPatterns(23)
+  val pat = allPatterns(11)
   println(pat)
   println(parse(pat)._1)
   println(":)")

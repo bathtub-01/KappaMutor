@@ -25,7 +25,7 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  val programMem = Module(new ProgramMem(ExampleBins.fact))
+  val programMem = Module(new ProgramMem(ProgramBin.prog))
   // val programMem = Module(new ProgramMemExt)
   val decoder = Module(new Decoder)
   val alu = Module(new TypedALU)
@@ -236,6 +236,7 @@ class DataPath extends Module {
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
         when(reductionStk.io.top(1).atomType === AtomType.FUN) {
+          // ad-hoc case to enforce strictness for any function call with single int as input
           reductionStk.io.pop := 2.U
           reductionStk.io.push := 2.U
           reductionStk.io.din(0) := reductionStk.io.top(1)

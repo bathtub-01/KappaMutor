@@ -122,7 +122,7 @@ object ExampleBins {
   // require 7 or 5 cycles to execute, input dependant
   val and2: Bin = Seq(
     templateBuilder(
-      appBuilder(funBuilder(1), K, K),
+      appBuilder(funBuilder(1), A, K),
       0
     ),
     templateBuilder(
