@@ -135,7 +135,7 @@ class DataPath extends Module {
           stackUpdate()
           preFetch(newSpine.app(0).payload)
         }.elsewhen(needWrite) { // stalled
-          programMem.io.rdAddr := newSpine.app(0).payload // keep the assumption
+          programMem.io.rdAddr := reductionStk.io.top(0).payload // keep the assumption
         }.otherwise { // stall relaese
           stackUpdate()
           // assume: two heap ports are free to use
@@ -147,11 +147,13 @@ class DataPath extends Module {
             heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
             heapBumper := heapBumper + 1.U
             pushPipeline(ptrRedirect(template.apps(1)))
+            programMem.io.rdAddr := newSpine.app(0).payload
           }.otherwise { // template.appsNum === 3.U
             heapWrite(heap.io.readwritePorts(0), ptrRedirect(template.apps(0)), heapBumper)
             heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(1)), heapBumper + 1.U)
             heapBumper := heapBumper + 2.U
             pushPipeline(ptrRedirect(template.apps(2)))
+            programMem.io.rdAddr := newSpine.app(0).payload
           }
         }
       }
