@@ -5,6 +5,7 @@
 011 COM
 100 INT
 101 PRM
+110 Y
 
 # Primitives - in decimal
 4 ==

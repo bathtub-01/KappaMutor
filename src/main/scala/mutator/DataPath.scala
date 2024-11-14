@@ -270,7 +270,32 @@ class DataPath extends Module {
           preFetch(reductionStk.io.din(0).payload)
         }
       }
-      is(AtomType.PRM) {/* PRM won't be showing at stack top */}
+      is(AtomType.PRM) {/* PRM won't be showing at stack top */
+        // ad-hoc approach, to fix primitives being created on stack top during runtime
+        reductionStk.io.pop := 2.U
+        reductionStk.io.push := 2.U
+        reductionStk.io.din(0) := reductionStk.io.top(1)
+        reductionStk.io.din(1) := reductionStk.io.top(0)
+        preFetch(reductionStk.io.top(1).payload)
+      }
+      is(AtomType.Y) {
+        when(needWrite) {
+          // stalled
+        }.otherwise {
+          reductionStk.io.pop := 2.U
+          reductionStk.io.push := 2.U
+          reductionStk.io.din(0) := reductionStk.io.top(1)
+          reductionStk.io.din(1).atomType := AtomType.PTR
+          reductionStk.io.din(1).payload := heapBumper
+          heap.io.readwritePorts(1).enable := true.B
+          heap.io.readwritePorts(1).isWrite := true.B
+          heap.io.readwritePorts(1).address := heapBumper
+          heap.io.readwritePorts(1).writeData.app(0).atomType := AtomType.Y
+          heap.io.readwritePorts(1).writeData.app(1) := reductionStk.io.top(1)
+          preFetch(reductionStk.io.top(1).payload)
+          heapBumper := heapBumper + 1.U
+        }
+      }
       is(AtomType.NOP) {/* do nothing */}
     }
   }

@@ -76,6 +76,12 @@ object Helper {
       ).asUInt
     )
   }
+
+  def yBuilder(): Atom =
+    (new Atom).Lit(
+      _.atomType -> AtomType.Y,
+      _.payload -> 0.U
+    )
   
   def appBuilder(atoms: Atom*): Application = 
     (new Application).Lit(
