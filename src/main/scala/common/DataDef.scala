@@ -12,7 +12,6 @@ import SystemConfig._
 */
 object AtomType extends ChiselEnum {
   val NOP = Value
-  val FUN = Value
   val PTR = Value
   val COM = Value
   val INT = Value

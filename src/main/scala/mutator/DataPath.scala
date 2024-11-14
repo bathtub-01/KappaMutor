@@ -15,8 +15,8 @@ class DataPath extends Module {
     val stkTops = Output((Vec(stackN, new Atom)))
     val stkElms = Output(UInt(log2Ceil(stackN * stackSizeEach + 1).W))
     val done = Output(Bool())
-    // val extMemIO = new MemIOBundle(programMemSize, new Template)
-    // val extMemEn = Input(Bool())
+    val progInject = Input(Bool())
+    val progInjectIO = Input(new Application)
   })
   object StmState extends ChiselEnum {
     val idle = Value
@@ -25,8 +25,6 @@ class DataPath extends Module {
 
   val reductionStk = Module(new XRegStack(stackN, stackSizeEach, new Atom))
   val heap = Module(new Heap)
-  val programMem = Module(new ProgramMem(ProgramBin.prog))
-  // val programMem = Module(new ProgramMemExt)
   val decoder = Module(new Decoder)
   val alu = Module(new TypedALU)
 
@@ -45,29 +43,6 @@ class DataPath extends Module {
     heap.io.readwritePorts(0).enable := true.B
     heap.io.readwritePorts(0).isWrite := false.B
     heap.io.readwritePorts(0).address := addr
-    programMem.io.rdAddr := addr
-  }
-  
-  def ptrRedirect(app: Vec[Atom]): Vec[Atom] = {
-    def red(atom: Atom): Atom = {
-      if(atom.atomType == AtomType.PTR)
-        atom.Lit(_.payload -> (atom.payload + heapBumper))
-      else
-        atom
-    }
-    VecInit(app.map(red))
-  }
-  def ptrRedirect(app: Application): Application = {
-    val wires = Wire(new Application)
-    app.app.zip(wires.app)foreach{case (atom, wire) => 
-      wire.atomType := atom.atomType
-      when(atom.atomType === AtomType.PTR) {
-        wire.payload := atom.payload + heapBumper
-      }.otherwise {
-        wire.payload := atom.payload
-      }
-    }
-    wires
   }
 
   def heapWrite(port: MemoryReadWritePort[Application], wData: Application, wAddr: UInt): Unit = {
@@ -87,7 +62,7 @@ class DataPath extends Module {
   reductionStk.io.push := 0.U
   reductionStk.io.pop := 0.U
   reductionStk.io.din.foreach(p => p := nopBuilder)
-  heap.io.readwritePorts(0).enable := false.B
+  heap.io.readwritePorts(0).enable := false.B             // FIXME: abstract this long thing as helper functions
   heap.io.readwritePorts(0).address := 0.U
   heap.io.readwritePorts(0).writeData := 0.U.asTypeOf(new Application)
   heap.io.readwritePorts(0).isWrite:= false.B
@@ -95,9 +70,6 @@ class DataPath extends Module {
   heap.io.readwritePorts(1).address := 0.U
   heap.io.readwritePorts(1).writeData := 0.U.asTypeOf(new Application)
   heap.io.readwritePorts(1).isWrite:= false.B
-  programMem.io.rdAddr := 0.U
-  // programMem.extEn := io.extMemEn
-  // programMem.extIO <> io.extMemIO
   decoder.in := DontCare
   alu.io.fn := DontCare
   alu.io.in1 := DontCare
@@ -107,56 +79,26 @@ class DataPath extends Module {
   io.stkElms := reductionStk.io.elms
   // ==================================================
 
+  // ============= program injection ==================
+  when(stmReg === StmState.idle && io.progInject) {
+    heapWrite(heap.io.readwritePorts(0), io.progInjectIO, heapBumper)
+    heapBumper := heapBumper + 1.U
+  }
+
   // ============= startup logic ======================
   when(io.start && reductionStk.io.elms === 0.U) {
     stmReg := StmState.working
     reductionStk.io.push := 1.U
     reductionStk.io.pop := 0.U
-    reductionStk.io.din(0) := funBuilder(0)
-    programMem.io.rdAddr := 0.U
+    reductionStk.io.din(0) := ptrBuilder(0)
+    // read fun0 from heap
+    preFetch(0.U)
   }
   // ==================================================
  
   // ============= reduction logic ====================
   when(stmReg === StmState.working) {
     switch(reductionStk.io.top(0).atomType) {
-      is(AtomType.FUN) { // assume: program mem data is ready for read
-        // =========== stack update ============
-        val template = programMem.io.rdData
-        val spine = template.spine
-        val newSpine = ptrRedirect(spine)
-        def stackUpdate() = {
-          reductionStk.io.pop := 1.U
-          reductionStk.io.push := atomCount(spine.app)
-          reductionStk.io.din.zip(newSpine.app).foreach{case(port, a) => port := a}
-        }
-        // =========== heap writing ============
-        when(template.appsNum === 0.U) { // not stalled
-          stackUpdate()
-          preFetch(newSpine.app(0).payload)
-        }.elsewhen(needWrite) { // stalled
-          programMem.io.rdAddr := reductionStk.io.top(0).payload // keep the assumption
-        }.otherwise { // stall relaese
-          stackUpdate()
-          // assume: two heap ports are free to use
-          when(template.appsNum === 1.U) { 
-            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
-            heapBumper := heapBumper + 1.U
-            preFetch(newSpine.app(0).payload)
-          }.elsewhen(template.appsNum === 2.U) {
-            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(0)), heapBumper)
-            heapBumper := heapBumper + 1.U
-            pushPipeline(ptrRedirect(template.apps(1)))
-            programMem.io.rdAddr := newSpine.app(0).payload
-          }.otherwise { // template.appsNum === 3.U
-            heapWrite(heap.io.readwritePorts(0), ptrRedirect(template.apps(0)), heapBumper)
-            heapWrite(heap.io.readwritePorts(1), ptrRedirect(template.apps(1)), heapBumper + 1.U)
-            heapBumper := heapBumper + 2.U
-            pushPipeline(ptrRedirect(template.apps(2)))
-            programMem.io.rdAddr := newSpine.app(0).payload
-          }
-        }
-      }
       is(AtomType.PTR) { // assume: heap data is ready for read
         when(!needWrite) {
           val app = heap.io.readwritePorts(0).readData
@@ -237,14 +179,7 @@ class DataPath extends Module {
       }
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
-        when(reductionStk.io.top(1).atomType === AtomType.FUN) {
-          // ad-hoc case to enforce strictness for any function call with single int as input
-          reductionStk.io.pop := 2.U
-          reductionStk.io.push := 2.U
-          reductionStk.io.din(0) := reductionStk.io.top(1)
-          reductionStk.io.din(1) := reductionStk.io.top(0)
-          preFetch(reductionStk.io.top(1).payload)
-        }.elsewhen(reductionStk.io.top(2).atomType === AtomType.INT) {
+        when(reductionStk.io.top(2).atomType === AtomType.INT) {
           when(prmPayload.swap) {
             alu.io.in1 := reductionStk.io.top(2).payload
             alu.io.in2 := reductionStk.io.top(0).payload
@@ -270,15 +205,15 @@ class DataPath extends Module {
           preFetch(reductionStk.io.din(0).payload)
         }
       }
-      is(AtomType.PRM) {/* PRM won't be showing at stack top */
-        // ad-hoc approach, to fix primitives being created on stack top during runtime
+      is(AtomType.PRM) {/* PRM won't be showing at stack top -- or maybe it will?*/
+        // ad-hoc approach, to fix primitives being created on stack top during runtime (foldl (+) 0 [1..5])
         reductionStk.io.pop := 2.U
         reductionStk.io.push := 2.U
         reductionStk.io.din(0) := reductionStk.io.top(1)
         reductionStk.io.din(1) := reductionStk.io.top(0)
         preFetch(reductionStk.io.top(1).payload)
       }
-      is(AtomType.Y) {
+      is(AtomType.Y) { // TODO: improve this to not create new instances every time.
         when(needWrite) {
           // stalled
         }.otherwise {
@@ -296,7 +231,9 @@ class DataPath extends Module {
           heapBumper := heapBumper + 1.U
         }
       }
-      is(AtomType.NOP) {/* do nothing */}
+      is(AtomType.NOP) {/* do nothing */
+        heapBumper := 0.U
+      }
     }
   }
   
@@ -314,7 +251,6 @@ class DataPath extends Module {
     reductionStk.io.pop := 0.U
     heap.io.readwritePorts(0).enable := false.B
     heap.io.readwritePorts(1).enable := false.B
-    programMem.io.rdAddr := 0.U
   }
 
   when(reductionStk.io.top(0).atomType === AtomType.COM) {

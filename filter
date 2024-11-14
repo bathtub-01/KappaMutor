@@ -1,11 +1,10 @@
 # AtomType - in binary
 000 NOP
-001 FUN
-010 PTR
-011 COM
-100 INT
-101 PRM
-110 Y
+001 PTR
+010 COM
+011 INT
+100 PRM
+101 Y
 
 # Primitives - in decimal
 4 ==
