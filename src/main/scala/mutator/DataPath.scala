@@ -13,7 +13,7 @@ class DataPath extends Module {
   val io = IO(new Bundle {
     val start = Input(Bool())
     val stkTops = Output((Vec(stackN, new Atom)))
-    val stkElms = Output(UInt(log2Ceil(stackN * stackSizeEach + 1).W))
+    val stkElms = Output(UInt(log2Ceil(stackTotalSize + 1).W))
     val done = Output(Bool())
     val progInject = Input(Bool())
     val progInjectIO = Input(new Application)
@@ -27,6 +27,7 @@ class DataPath extends Module {
   val heap = Module(new Heap)
   val decoder = Module(new Decoder)
   val alu = Module(new TypedALU)
+  val updateStk = Module(new RegStack(updateStackSize, new UpdateRecord))
 
   val stmReg = RegInit(StmState.idle)
   val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
@@ -35,6 +36,26 @@ class DataPath extends Module {
 
   def atomCount(app: Vec[Atom]): UInt = { // maybe look at Vec.lastIndexWhere?
     app.count(atom => atom.atomType =/= AtomType.NOP)
+  }
+
+  def arity(atom: Atom): UInt = {
+    val res = Wire(UInt(3.W))
+    when(atom.atomType === AtomType.NOP || atom.atomType === AtomType.PTR) {
+      res := 0.U
+    }.elsewhen(atom.atomType === AtomType.COM) {
+      res := atom.payload.asTypeOf(new ComPayload).arity
+    }.elsewhen(atom.atomType === AtomType.INT) {
+      res := 2.U
+    }.otherwise { // PRM Y
+      res := 1.U
+    }
+    res
+  }
+
+  def isReducible(app: Vec[Atom]): Bool = {
+    // PTR: always
+    // app(0).atomType === AtomType.PTR ||
+    arity(app(0)) < atomCount(app)
   }
 
   def preFetch(addr: UInt): Unit = {
@@ -74,6 +95,7 @@ class DataPath extends Module {
   alu.io.fn := DontCare
   alu.io.in1 := DontCare
   alu.io.in2 := DontCare
+  updateStk.init
 
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
@@ -98,6 +120,21 @@ class DataPath extends Module {
  
   // ============= reduction logic ====================
   when(stmReg === StmState.working) {
+    // first check if we can update the heap
+    when(arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {
+      val toWrite = Wire(new Application)
+      toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
+        when(idx.U <= reductionStk.io.elms - updateStk.io.top.stackDepth) {
+          atom := reductionStk.io.top(idx)
+        }.otherwise {
+          atom := nopBuilder
+        }
+      }
+      heapWrite(heap.io.readwritePorts(0), toWrite, updateStk.io.top.heapAddr)
+      updateStk.pop
+      // no prefetch needed, since a PTR will be at top here
+    }.otherwise{
+    // if we can't, do the standard reduction
     switch(reductionStk.io.top(0).atomType) {
       is(AtomType.PTR) { // assume: heap data is ready for read
         when(!needWrite) {
@@ -106,11 +143,16 @@ class DataPath extends Module {
           reductionStk.io.push := atomCount(app.app)
           reductionStk.io.din.zip(app.app).foreach{case(port, a) => port := a}
           preFetch(app.app(0).payload)
+          // push to update stack when the app is reducible
+          when(isReducible(app.app)) {
+            val toPush = Wire(new UpdateRecord)
+            toPush.stackDepth := reductionStk.io.elms
+            toPush.heapAddr := reductionStk.io.top(0).payload
+            updateStk.push(toPush)
+          }
         }.otherwise { /* stalled, keep reading to maintain the assumption */ 
           // assumption: in a stalled cycle, heap port 0 is always free for reading
-          heap.io.readwritePorts(0).enable := true.B
-          heap.io.readwritePorts(0).isWrite := false.B
-          heap.io.readwritePorts(0).address := reductionStk.io.top(0).payload
+          preFetch(reductionStk.io.top(0).payload)
         }
       }
       is(AtomType.COM) {
@@ -225,8 +267,9 @@ class DataPath extends Module {
           heap.io.readwritePorts(1).enable := true.B
           heap.io.readwritePorts(1).isWrite := true.B
           heap.io.readwritePorts(1).address := heapBumper
-          heap.io.readwritePorts(1).writeData.app(0).atomType := AtomType.Y
-          heap.io.readwritePorts(1).writeData.app(1) := reductionStk.io.top(1)
+          heap.io.readwritePorts(1).writeData.app(0) := reductionStk.io.top(1)
+          heap.io.readwritePorts(1).writeData.app(1).atomType := AtomType.PTR
+          heap.io.readwritePorts(1).writeData.app(1).payload := heapBumper
           preFetch(reductionStk.io.top(1).payload)
           heapBumper := heapBumper + 1.U
         }
@@ -234,6 +277,7 @@ class DataPath extends Module {
       is(AtomType.NOP) {/* do nothing */
         heapBumper := 0.U
       }
+    }
     }
   }
   

@@ -10,33 +10,6 @@ import common._
 import common.SystemConfig._
 import common.Helper._
 
-class ProgramMem(bin: Seq[Template]) extends Module {
-  val io = IO(new RomIO(programMemSize, new Template))
-
-  val rom = Module(new BlockMemRom(programMemSize, new Template)(bin))
-  io :<>= rom.io
-}
-
-class ProgramMemExt extends Module {
-  val io = IO(new RomIO(programMemSize, new Template))
-  val extIO = IO(new MemIOBundle(programMemSize, new Template))
-  val extEn = IO(Input(Bool()))
-
-  val ram = Module(new BlockMem(programMemSize, new Template))
-
-  when(extEn){
-    extIO :<>= ram.io
-    io.rdData := 0.U.asTypeOf(new Template)
-  }.otherwise{
-    io.rdData := ram.io.rdData
-    ram.io.rdAddr := io.rdAddr
-    ram.io.wrEna := false.B
-    ram.io.wrAddr := DontCare
-    ram.io.wrData := DontCare
-    extIO := DontCare
-  }
-}
-
 object ExampleBins {
   type Bin = Seq[Template]
 
@@ -51,7 +24,6 @@ object ExampleBins {
   val Cp:Atom = comBuilder(4, 5, List(0, 1, 3, 2)) // X(XX)X
   val A: Atom = comBuilder(2, 0, List(1)) // X
   val U: Atom = comBuilder(2, 1, List(1, 0)) // XX
-  // val Y: Atom = ??? // let's see what we can do...
   val Z: Atom = comBuilder(3, 1, List(0, 1)) // XX
   val P: Atom = comBuilder(3, 2, List(2, 0, 1)) // XXX
   val R: Atom = comBuilder(3, 2, List(1, 2, 0)) // XXX
