@@ -34,6 +34,9 @@ class DataPath extends Module {
   val needWrite = RegInit(false.B)
   val pipelineReg = RegInit(0.U.asTypeOf(new Application))
 
+  val needUpdate = Wire(Bool())
+  val stuckAll = Wire(Bool())
+
   def atomCount(app: Vec[Atom]): UInt = { // maybe look at Vec.lastIndexWhere?
     app.count(atom => atom.atomType =/= AtomType.NOP)
   }
@@ -96,6 +99,8 @@ class DataPath extends Module {
   alu.io.in1 := DontCare
   alu.io.in2 := DontCare
   updateStk.init
+  needUpdate := false.B
+  stuckAll := false.B
 
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
@@ -120,21 +125,25 @@ class DataPath extends Module {
  
   // ============= reduction logic ====================
   when(stmReg === StmState.working) {
-    // first check if we can update the heap
+    // use the `needUpdate` signal to shadow all the rules
     when(arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {
-      val toWrite = Wire(new Application)
-      toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
-        when(idx.U <= reductionStk.io.elms - updateStk.io.top.stackDepth) {
-          atom := reductionStk.io.top(idx)
-        }.otherwise {
-          atom := nopBuilder
+      needUpdate := true.B
+      when(needWrite) { // stall 
+        stuckAll := true.B
+      }.otherwise {
+        val toWrite = Wire(new Application)
+        toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
+          when(idx.U <= reductionStk.io.elms - updateStk.io.top.stackDepth) {
+            atom := reductionStk.io.top(idx)
+          }.otherwise {
+            atom := nopBuilder
+          }
         }
+        heapWrite(heap.io.readwritePorts(1), toWrite, updateStk.io.top.heapAddr)
+        updateStk.pop
+        // other rules might use heap port 0 for prefetching
       }
-      heapWrite(heap.io.readwritePorts(0), toWrite, updateStk.io.top.heapAddr)
-      updateStk.pop
-      // no prefetch needed, since a PTR will be at top here
-    }.otherwise{
-    // if we can't, do the standard reduction
+    }
     switch(reductionStk.io.top(0).atomType) {
       is(AtomType.PTR) { // assume: heap data is ready for read
         when(!needWrite) {
@@ -193,70 +202,77 @@ class DataPath extends Module {
           reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
         }
 
-        when(app1Valid === 0.U) {
-          stackUpdate()
-          preFetch(reductionStk.io.din(0).payload)
-        }.elsewhen(needWrite) {
-          // stalled, don't need maintainance reading
-        }.elsewhen(app2Valid === 0.U) {
-          // spine + app1
-          stackUpdate()
-          heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
-          heapBumper := heapBumper + 1.U
-          preFetch(reductionStk.io.din(0).payload)
-        }.elsewhen(app3Valid === 0.U) {
-          // spine + app1 + app2
-          stackUpdate()
-          heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
-          heapBumper := heapBumper + 1.U
-          pushPipeline(translate(decoder.app2))
-        }.otherwise {
-          // spine + app1 + app2 + app3
-          stackUpdate()
-          heapWrite(heap.io.readwritePorts(0), translate(decoder.app1), heapBumper)
-          heapWrite(heap.io.readwritePorts(1), translate(decoder.app2), heapBumper + 1.U)
-          heapBumper := heapBumper + 2.U
-          pushPipeline(translate(decoder.app3))
+        when(!stuckAll) {
+          when(app1Valid === 0.U) {
+            stackUpdate()
+            preFetch(reductionStk.io.din(0).payload)
+          }.elsewhen(needWrite && !needUpdate) {
+            // stalled, don't need maintainance reading
+          }.elsewhen(app2Valid === 0.U) {
+            // spine + app1
+            stackUpdate()
+            heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
+            heapBumper := heapBumper + 1.U
+            preFetch(reductionStk.io.din(0).payload)
+          }.elsewhen(app3Valid === 0.U) {
+            // spine + app1 + app2
+            stackUpdate()
+            heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
+            heapBumper := heapBumper + 1.U
+            pushPipeline(translate(decoder.app2))
+          }.otherwise {
+            // spine + app1 + app2 + app3
+            stackUpdate()
+            heapWrite(heap.io.readwritePorts(0), translate(decoder.app1), heapBumper)
+            heapWrite(heap.io.readwritePorts(1), translate(decoder.app2), heapBumper + 1.U)
+            heapBumper := heapBumper + 2.U
+            pushPipeline(translate(decoder.app3))
+          }
         }
+        
       }
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
-        when(reductionStk.io.top(2).atomType === AtomType.INT) {
-          when(prmPayload.swap) {
-            alu.io.in1 := reductionStk.io.top(2).payload
-            alu.io.in2 := reductionStk.io.top(0).payload
+        when(!stuckAll) {
+          when(reductionStk.io.top(2).atomType === AtomType.INT) {
+            when(prmPayload.swap) {
+              alu.io.in1 := reductionStk.io.top(2).payload
+              alu.io.in2 := reductionStk.io.top(0).payload
+            }.otherwise {
+              alu.io.in1 := reductionStk.io.top(0).payload
+              alu.io.in2 := reductionStk.io.top(2).payload
+            }
+            alu.io.fn := prmPayload.fun
+            reductionStk.io.pop := 3.U
+            reductionStk.io.push := 1.U
+            reductionStk.io.din(0) := alu.io.out
+            // no prefetch needed
           }.otherwise {
-            alu.io.in1 := reductionStk.io.top(0).payload
-            alu.io.in2 := reductionStk.io.top(2).payload
+            val newPrm = Wire(new PrmPayload)
+            newPrm.fun := prmPayload.fun
+            newPrm.swap := ~prmPayload.swap
+            reductionStk.io.pop := 3.U
+            reductionStk.io.push := 3.U
+            reductionStk.io.din(0) := reductionStk.io.top(2)
+            reductionStk.io.din(1).atomType := AtomType.PRM
+            reductionStk.io.din(1).payload := newPrm.asUInt
+            reductionStk.io.din(2) := reductionStk.io.top(0)
+            preFetch(reductionStk.io.din(0).payload)
           }
-          alu.io.fn := prmPayload.fun
-          reductionStk.io.pop := 3.U
-          reductionStk.io.push := 1.U
-          reductionStk.io.din(0) := alu.io.out
-          // no prefetch needed
-        }.otherwise {
-          val newPrm = Wire(new PrmPayload)
-          newPrm.fun := prmPayload.fun
-          newPrm.swap := ~prmPayload.swap
-          reductionStk.io.pop := 3.U
-          reductionStk.io.push := 3.U
-          reductionStk.io.din(0) := reductionStk.io.top(2)
-          reductionStk.io.din(1).atomType := AtomType.PRM
-          reductionStk.io.din(1).payload := newPrm.asUInt
-          reductionStk.io.din(2) := reductionStk.io.top(0)
-          preFetch(reductionStk.io.din(0).payload)
         }
       }
       is(AtomType.PRM) {/* PRM won't be showing at stack top -- or maybe it will?*/
         // ad-hoc approach, to fix primitives being created on stack top during runtime (foldl (+) 0 [1..5])
-        reductionStk.io.pop := 2.U
-        reductionStk.io.push := 2.U
-        reductionStk.io.din(0) := reductionStk.io.top(1)
-        reductionStk.io.din(1) := reductionStk.io.top(0)
-        preFetch(reductionStk.io.top(1).payload)
+        when(!stuckAll) {
+          reductionStk.io.pop := 2.U
+          reductionStk.io.push := 2.U
+          reductionStk.io.din(0) := reductionStk.io.top(1)
+          reductionStk.io.din(1) := reductionStk.io.top(0)
+          preFetch(reductionStk.io.top(1).payload)
+        }
       }
-      is(AtomType.Y) { // TODO: improve this to not create new instances every time.
-        when(needWrite) {
+      is(AtomType.Y) { 
+        when(needWrite && !needUpdate) {
           // stalled
         }.otherwise {
           reductionStk.io.pop := 2.U
@@ -277,7 +293,6 @@ class DataPath extends Module {
       is(AtomType.NOP) {/* do nothing */
         heapBumper := 0.U
       }
-    }
     }
   }
   
