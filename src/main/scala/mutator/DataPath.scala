@@ -206,7 +206,7 @@ class DataPath extends Module {
           when(app1Valid === 0.U) {
             stackUpdate()
             preFetch(reductionStk.io.din(0).payload)
-          }.elsewhen(needWrite && !needUpdate) {
+          }.elsewhen(needWrite || needUpdate) {
             // stalled, don't need maintainance reading
           }.elsewhen(app2Valid === 0.U) {
             // spine + app1
@@ -272,7 +272,7 @@ class DataPath extends Module {
         }
       }
       is(AtomType.Y) { 
-        when(needWrite && !needUpdate) {
+        when(needWrite || needUpdate) {
           // stalled
         }.otherwise {
           reductionStk.io.pop := 2.U

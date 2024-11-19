@@ -25,11 +25,11 @@ object SystemConfig {
   val maxAppLen = 6
   val maxAppsPerBody = 4 // spine included
 
-  val heapSize = 1024
-  val stackSizeEach = 64 
+  val heapSize = 8 * 1024
+  val stackSizeEach = 256 
   def stackTotalSize = stackN * stackSizeEach
 
-  val updateStackSize = 256
+  val updateStackSize = 512
 
   def atomPayloadSize = atomSize - AtomType.getWidth
 }
