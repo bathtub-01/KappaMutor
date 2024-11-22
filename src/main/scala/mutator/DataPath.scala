@@ -14,6 +14,7 @@ class DataPath extends Module {
     val start = Input(Bool())
     val stkTops = Output((Vec(stackN, new Atom)))
     val stkElms = Output(UInt(log2Ceil(stackTotalSize + 1).W))
+    val updStkElms = Output(UInt(log2Ceil(updateStackSize + 1).W))
     val done = Output(Bool())
     val progInject = Input(Bool())
     val progInjectIO = Input(new Application)
@@ -58,7 +59,9 @@ class DataPath extends Module {
   def isReducible(app: Vec[Atom]): Bool = {
     // PTR: always
     // app(0).atomType === AtomType.PTR ||
-    arity(app(0)) < atomCount(app)
+    arity(app(0)) < atomCount(app) 
+    // app(0).atomType =/= AtomType.Y &&
+    // app(0).atomType =/= AtomType.PRM
   }
 
   def preFetch(addr: UInt): Unit = {
@@ -104,6 +107,7 @@ class DataPath extends Module {
 
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
+  io.updStkElms := updateStk.io.elms
   // ==================================================
 
   // ============= program injection ==================
@@ -126,14 +130,14 @@ class DataPath extends Module {
   // ============= reduction logic ====================
   when(stmReg === StmState.working) {
     // use the `needUpdate` signal to shadow all the rules
-    when(arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {
+    when(updateStk.io.elms > 0.U && arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {  
       needUpdate := true.B
-      when(needWrite) { // stall 
+      when(needWrite) { // stall and stuck all the reductions
         stuckAll := true.B
       }.otherwise {
         val toWrite = Wire(new Application)
         toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
-          when(idx.U <= reductionStk.io.elms - updateStk.io.top.stackDepth) {
+          when(idx.U <= reductionStk.io.elms - updateStk.io.top.stackDepth) { 
             atom := reductionStk.io.top(idx)
           }.otherwise {
             atom := nopBuilder
@@ -146,12 +150,12 @@ class DataPath extends Module {
     }
     switch(reductionStk.io.top(0).atomType) {
       is(AtomType.PTR) { // assume: heap data is ready for read
-        when(!needWrite) {
+        when(!needWrite) { // heap update never happens here
           val app = heap.io.readwritePorts(0).readData
           reductionStk.io.pop := 1.U
           reductionStk.io.push := atomCount(app.app)
           reductionStk.io.din.zip(app.app).foreach{case(port, a) => port := a}
-          preFetch(app.app(0).payload)
+          preFetch(reductionStk.io.din(0).payload)
           // push to update stack when the app is reducible
           when(isReducible(app.app)) {
             val toPush = Wire(new UpdateRecord)
@@ -179,7 +183,7 @@ class DataPath extends Module {
             wire.payload := e.idx + heapBumper
           }.otherwise { // ARG
             when(e.idx === 0b111.U) {
-              wire := 0.U.asTypeOf(new Atom)
+              wire := nopBuilder
             }.otherwise {
               wire := reductionStk.io.top(comPayload.idxs(e.idx) + 1.U)
             } 
@@ -202,11 +206,12 @@ class DataPath extends Module {
           reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
         }
 
-        when(!stuckAll) {
+        when(!needUpdate/*!stuckAll*/) {
           when(app1Valid === 0.U) {
+            // only spine
             stackUpdate()
             preFetch(reductionStk.io.din(0).payload)
-          }.elsewhen(needWrite || needUpdate) {
+          }.elsewhen(needWrite/* || needUpdate*/) {
             // stalled, don't need maintainance reading
           }.elsewhen(app2Valid === 0.U) {
             // spine + app1
@@ -233,8 +238,14 @@ class DataPath extends Module {
       }
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
-        when(!stuckAll) {
-          when(reductionStk.io.top(2).atomType === AtomType.INT) {
+        when(!needUpdate/*!stuckAll*/) {
+          when(reductionStk.io.top(1).atomType === AtomType.PTR) {
+            reductionStk.io.pop := 2.U
+            reductionStk.io.push := 2.U
+            reductionStk.io.din(0) := reductionStk.io.top(1)
+            reductionStk.io.din(1) := reductionStk.io.top(0)
+            preFetch(reductionStk.io.din(0).payload)
+          }.elsewhen(reductionStk.io.top(2).atomType === AtomType.INT) {
             when(prmPayload.swap) {
               alu.io.in1 := reductionStk.io.top(2).payload
               alu.io.in2 := reductionStk.io.top(0).payload
@@ -263,17 +274,17 @@ class DataPath extends Module {
       }
       is(AtomType.PRM) {/* PRM won't be showing at stack top -- or maybe it will?*/
         // ad-hoc approach, to fix primitives being created on stack top during runtime (foldl (+) 0 [1..5])
-        when(!stuckAll) {
+        when(!needUpdate/*!stuckAll*/) {
           reductionStk.io.pop := 2.U
           reductionStk.io.push := 2.U
           reductionStk.io.din(0) := reductionStk.io.top(1)
           reductionStk.io.din(1) := reductionStk.io.top(0)
-          preFetch(reductionStk.io.top(1).payload)
+          preFetch(reductionStk.io.din(0).payload)
         }
       }
       is(AtomType.Y) { 
         when(needWrite || needUpdate) {
-          // stalled
+          // stalled, don't need maintainance reading
         }.otherwise {
           reductionStk.io.pop := 2.U
           reductionStk.io.push := 2.U
@@ -286,7 +297,7 @@ class DataPath extends Module {
           heap.io.readwritePorts(1).writeData.app(0) := reductionStk.io.top(1)
           heap.io.readwritePorts(1).writeData.app(1).atomType := AtomType.PTR
           heap.io.readwritePorts(1).writeData.app(1).payload := heapBumper
-          preFetch(reductionStk.io.top(1).payload)
+          preFetch(reductionStk.io.din(0).payload)
           heapBumper := heapBumper + 1.U
         }
       }
