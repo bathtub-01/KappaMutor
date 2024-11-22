@@ -132,6 +132,7 @@ class DataPath extends Module {
     // use the `needUpdate` signal to shadow all the rules
     when(updateStk.io.elms > 0.U && arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {  
       needUpdate := true.B
+      stuckAll := needWrite || updateStk.io.top.chaining
       when(needWrite) { // stall and stuck all the reductions
         stuckAll := true.B
       }.otherwise {
@@ -161,6 +162,7 @@ class DataPath extends Module {
             val toPush = Wire(new UpdateRecord)
             toPush.stackDepth := reductionStk.io.elms
             toPush.heapAddr := reductionStk.io.top(0).payload
+            toPush.chaining := updateStk.io.top.stackDepth === reductionStk.io.elms
             updateStk.push(toPush)
           }
         }.otherwise { /* stalled, keep reading to maintain the assumption */ 
@@ -206,12 +208,12 @@ class DataPath extends Module {
           reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
         }
 
-        when(!needUpdate/*!stuckAll*/) {
+        when(/*!needUpdate*/!stuckAll) {
           when(app1Valid === 0.U) {
             // only spine
             stackUpdate()
             preFetch(reductionStk.io.din(0).payload)
-          }.elsewhen(needWrite/* || needUpdate*/) {
+          }.elsewhen(needWrite || needUpdate) {
             // stalled, don't need maintainance reading
           }.elsewhen(app2Valid === 0.U) {
             // spine + app1
@@ -238,7 +240,7 @@ class DataPath extends Module {
       }
       is(AtomType.INT) {
         val prmPayload: PrmPayload = reductionStk.io.top(1).payload.asTypeOf(new PrmPayload)
-        when(!needUpdate/*!stuckAll*/) {
+        when(/*!needUpdate*/!stuckAll) {
           when(reductionStk.io.top(1).atomType === AtomType.PTR) {
             reductionStk.io.pop := 2.U
             reductionStk.io.push := 2.U
@@ -274,7 +276,7 @@ class DataPath extends Module {
       }
       is(AtomType.PRM) {/* PRM won't be showing at stack top -- or maybe it will?*/
         // ad-hoc approach, to fix primitives being created on stack top during runtime (foldl (+) 0 [1..5])
-        when(!needUpdate/*!stuckAll*/) {
+        when(/*!needUpdate*/!stuckAll) {
           reductionStk.io.pop := 2.U
           reductionStk.io.push := 2.U
           reductionStk.io.din(0) := reductionStk.io.top(1)
