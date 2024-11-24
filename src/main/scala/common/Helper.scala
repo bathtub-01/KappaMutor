@@ -22,11 +22,11 @@ object Helper {
       _.payload -> 0.U
     )
 
-  // def funBuilder(pointer: Int): Atom = 
-  //   (new Atom).Lit(
-  //     _.atomType -> AtomType.FUN,
-  //     _.payload -> pointer.U
-  //   )
+  def errorBuilder(code: Int): Atom =
+    (new Atom).Lit(
+      _.atomType -> AtomType.ERROR,
+      _.payload -> code.U
+    )
 
   def ptrBuilder(pointer: Int): Atom =
     (new Atom).Lit(

@@ -25,7 +25,7 @@ object SystemConfig {
   val maxAppLen = 6
   val maxAppsPerBody = 4 // spine included
 
-  val heapSize = 128 * 1024
+  val heapSize = 512 * 1024
   val stackSizeEach = 512 
   def stackTotalSize = stackN * stackSizeEach
 

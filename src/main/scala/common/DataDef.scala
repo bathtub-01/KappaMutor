@@ -17,6 +17,7 @@ object AtomType extends ChiselEnum {
   val INT = Value
   val PRM = Value
   val Y   = Value
+  val ERROR = Value
 }
 
 abstract class AtomPayload extends Bundle

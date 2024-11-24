@@ -132,9 +132,9 @@ class DataPath extends Module {
     // use the `needUpdate` signal to shadow all the rules
     when(updateStk.io.elms > 0.U && arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {  
       needUpdate := true.B
-      stuckAll := needWrite || updateStk.io.top.chaining
+      stuckAll := needWrite || (arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.previousStackDepth)
       when(needWrite) { // stall and stuck all the reductions
-        stuckAll := true.B
+        
       }.otherwise {
         val toWrite = Wire(new Application)
         toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
@@ -162,7 +162,8 @@ class DataPath extends Module {
             val toPush = Wire(new UpdateRecord)
             toPush.stackDepth := reductionStk.io.elms
             toPush.heapAddr := reductionStk.io.top(0).payload
-            toPush.chaining := updateStk.io.top.stackDepth === reductionStk.io.elms
+            // toPush.chaining := updateStk.io.top.stackDepth === reductionStk.io.elms
+            toPush.previousStackDepth := updateStk.io.top.stackDepth
             updateStk.push(toPush)
           }
         }.otherwise { /* stalled, keep reading to maintain the assumption */ 
@@ -302,6 +303,9 @@ class DataPath extends Module {
           preFetch(reductionStk.io.din(0).payload)
           heapBumper := heapBumper + 1.U
         }
+      }
+      is(AtomType.ERROR) {
+        stop()
       }
       is(AtomType.NOP) {/* do nothing */
         heapBumper := 0.U
