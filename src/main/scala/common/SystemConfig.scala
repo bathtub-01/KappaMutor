@@ -17,7 +17,7 @@ object SystemConfig {
   val atomSize = 32
   val stackN = 8
 
-  val comArity = 6
+  val comArity = 7
   val comPattern = 64
   val comIdxs = 6
 
@@ -25,7 +25,7 @@ object SystemConfig {
   val maxAppLen = 6
   val maxAppsPerBody = 4 // spine included
 
-  val heapSize = 512 * 1024
+  val heapSize = 128 * 1024 // should be 256*1024 for SKI+ scheme...
   val stackSizeEach = 512 
   def stackTotalSize = stackN * stackSizeEach
 

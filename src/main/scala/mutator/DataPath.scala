@@ -18,6 +18,17 @@ class DataPath extends Module {
     val done = Output(Bool())
     val progInject = Input(Bool())
     val progInjectIO = Input(new Application)
+    // =========== profiling ports =============
+    val heapCsm = Output(UInt(log2Ceil(heapSize + 1).W))
+    val ptrRed = Output(Bool())
+    val combRed = Output(Bool())
+    val intRedApp = Output(Bool())
+    val intRedSwap = Output(Bool())
+    val prmRed = Output(Bool())
+    val yRed = Output(Bool())
+    val heapUpd = Output(Bool())
+    val heapUpdImp = Output(Bool())
+    val pipeImp = Output(Bool())
   })
   object StmState extends ChiselEnum {
     val idle = Value
@@ -31,7 +42,7 @@ class DataPath extends Module {
   val updateStk = Module(new RegStack(updateStackSize, new UpdateRecord))
 
   val stmReg = RegInit(StmState.idle)
-  val heapBumper = RegInit(0.U(log2Ceil(heapSize).W))
+  val heapBumper = RegInit(0.U(log2Ceil(heapSize + 1).W))
   val needWrite = RegInit(false.B)
   val pipelineReg = RegInit(0.U.asTypeOf(new Application))
 
@@ -108,6 +119,18 @@ class DataPath extends Module {
   io.stkTops := reductionStk.io.top
   io.stkElms := reductionStk.io.elms
   io.updStkElms := updateStk.io.elms
+  // =========== profiling ports =============
+  io.heapCsm := heapBumper
+  io.ptrRed := false.B
+  io.combRed := false.B
+  io.intRedApp := false.B
+  io.intRedSwap := false.B
+  io.prmRed := false.B
+  io.yRed := false.B
+  io.heapUpd := false.B
+  io.heapUpdImp := false.B
+  io.pipeImp := false.B
+  
   // ==================================================
 
   // ============= program injection ==================
@@ -147,6 +170,8 @@ class DataPath extends Module {
         heapWrite(heap.io.readwritePorts(1), toWrite, updateStk.io.top.heapAddr)
         updateStk.pop
         // other rules might use heap port 0 for prefetching
+        // =========== profiling ports =============
+        io.heapUpd := true.B
       }
     }
     switch(reductionStk.io.top(0).atomType) {
@@ -162,10 +187,11 @@ class DataPath extends Module {
             val toPush = Wire(new UpdateRecord)
             toPush.stackDepth := reductionStk.io.elms
             toPush.heapAddr := reductionStk.io.top(0).payload
-            // toPush.chaining := updateStk.io.top.stackDepth === reductionStk.io.elms
             toPush.previousStackDepth := updateStk.io.top.stackDepth
             updateStk.push(toPush)
           }
+          // =========== profiling ports =============
+          io.ptrRed := true.B
         }.otherwise { /* stalled, keep reading to maintain the assumption */ 
           // assumption: in a stalled cycle, heap port 0 is always free for reading
           preFetch(reductionStk.io.top(0).payload)
@@ -204,7 +230,7 @@ class DataPath extends Module {
         }
 
         def stackUpdate(): Unit = {
-          reductionStk.io.pop := comPayload.arity + 1.U
+          reductionStk.io.pop := comPayload.arity +& 1.U // need to express 8
           reductionStk.io.push := spineValid
           reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
         }
@@ -214,6 +240,10 @@ class DataPath extends Module {
             // only spine
             stackUpdate()
             preFetch(reductionStk.io.din(0).payload)
+            // =========== profiling ports =============
+            io.combRed := true.B
+            io.heapUpdImp := needUpdate
+            io.pipeImp := needWrite
           }.elsewhen(needWrite || needUpdate) {
             // stalled, don't need maintainance reading
           }.elsewhen(app2Valid === 0.U) {
@@ -222,12 +252,16 @@ class DataPath extends Module {
             heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
             heapBumper := heapBumper + 1.U
             preFetch(reductionStk.io.din(0).payload)
+            // =========== profiling ports =============
+            io.combRed := true.B
           }.elsewhen(app3Valid === 0.U) {
             // spine + app1 + app2
             stackUpdate()
             heapWrite(heap.io.readwritePorts(1), translate(decoder.app1), heapBumper)
             heapBumper := heapBumper + 1.U
             pushPipeline(translate(decoder.app2))
+            // =========== profiling ports =============
+            io.combRed := true.B
           }.otherwise {
             // spine + app1 + app2 + app3
             stackUpdate()
@@ -235,6 +269,8 @@ class DataPath extends Module {
             heapWrite(heap.io.readwritePorts(1), translate(decoder.app2), heapBumper + 1.U)
             heapBumper := heapBumper + 2.U
             pushPipeline(translate(decoder.app3))
+            // =========== profiling ports =============
+            io.combRed := true.B
           }
         }
         
@@ -248,6 +284,8 @@ class DataPath extends Module {
             reductionStk.io.din(0) := reductionStk.io.top(1)
             reductionStk.io.din(1) := reductionStk.io.top(0)
             preFetch(reductionStk.io.din(0).payload)
+            // =========== profiling ports =============
+            io.intRedSwap := true.B
           }.elsewhen(reductionStk.io.top(2).atomType === AtomType.INT) {
             when(prmPayload.swap) {
               alu.io.in1 := reductionStk.io.top(2).payload
@@ -261,6 +299,8 @@ class DataPath extends Module {
             reductionStk.io.push := 1.U
             reductionStk.io.din(0) := alu.io.out
             // no prefetch needed
+            // =========== profiling ports =============
+            io.intRedApp := true.B
           }.otherwise {
             val newPrm = Wire(new PrmPayload)
             newPrm.fun := prmPayload.fun
@@ -272,7 +312,12 @@ class DataPath extends Module {
             reductionStk.io.din(1).payload := newPrm.asUInt
             reductionStk.io.din(2) := reductionStk.io.top(0)
             preFetch(reductionStk.io.din(0).payload)
+            // =========== profiling ports =============
+            io.intRedSwap := true.B
           }
+          // =========== profiling ports =============
+          io.heapUpdImp := needUpdate
+          io.pipeImp := needWrite
         }
       }
       is(AtomType.PRM) {/* PRM won't be showing at stack top -- or maybe it will?*/
@@ -283,6 +328,10 @@ class DataPath extends Module {
           reductionStk.io.din(0) := reductionStk.io.top(1)
           reductionStk.io.din(1) := reductionStk.io.top(0)
           preFetch(reductionStk.io.din(0).payload)
+          // =========== profiling ports =============
+          io.prmRed := true.B
+          io.heapUpdImp := needUpdate
+          io.pipeImp := needWrite
         }
       }
       is(AtomType.Y) { 
@@ -302,6 +351,8 @@ class DataPath extends Module {
           heap.io.readwritePorts(1).writeData.app(1).payload := heapBumper
           preFetch(reductionStk.io.din(0).payload)
           heapBumper := heapBumper + 1.U
+          // =========== profiling ports =============
+          io.yRed := true.B
         }
       }
       is(AtomType.ERROR) {
@@ -317,6 +368,8 @@ class DataPath extends Module {
     heapWrite(heap.io.readwritePorts(1), pipelineReg, heapBumper)
     heapBumper := heapBumper + 1.U
     needWrite := false.B
+    // =========== profiling ports =============
+    io.combRed := true.B
   }
   // ==================================================
 
