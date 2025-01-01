@@ -22,6 +22,7 @@ class DataPath extends Module {
     val heapCsm = Output(UInt(log2Ceil(heapSize + 1).W))
     val ptrRed = Output(Bool())
     val combRed = Output(Bool())
+    val combRed_ = Output(Bool()) // second stage comb reduce
     val intRedApp = Output(Bool())
     val intRedSwap = Output(Bool())
     val prmRed = Output(Bool())
@@ -29,6 +30,16 @@ class DataPath extends Module {
     val heapUpd = Output(Bool())
     val heapUpdImp = Output(Bool())
     val pipeImp = Output(Bool())
+    val combHole1 = Output(Bool())
+    val combHole2 = Output(Bool())
+    val combHole3 = Output(Bool())
+    val combHole4 = Output(Bool())
+    val combHole5 = Output(Bool())
+    val combHole6 = Output(Bool())
+    val combApp0 = Output(Bool())
+    val combApp1 = Output(Bool())
+    val combApp2 = Output(Bool())
+    val combApp3 = Output(Bool())
   })
   object StmState extends ChiselEnum {
     val idle = Value
@@ -123,6 +134,7 @@ class DataPath extends Module {
   io.heapCsm := heapBumper
   io.ptrRed := false.B
   io.combRed := false.B
+  io.combRed_ := false.B
   io.intRedApp := false.B
   io.intRedSwap := false.B
   io.prmRed := false.B
@@ -130,7 +142,17 @@ class DataPath extends Module {
   io.heapUpd := false.B
   io.heapUpdImp := false.B
   io.pipeImp := false.B
-  
+  io.combHole1 := false.B
+  io.combHole2 := false.B
+  io.combHole3 := false.B
+  io.combHole4 := false.B
+  io.combHole5 := false.B
+  io.combHole6 := false.B
+  io.combApp0 := false.B
+  io.combApp1 := false.B
+  io.combApp2 := false.B
+  io.combApp3 := false.B
+
   // ==================================================
 
   // ============= program injection ==================
@@ -235,6 +257,15 @@ class DataPath extends Module {
           reductionStk.io.din.zip(decoder.spine).foreach{case(port, e) => port := translates(e)}
         }
 
+        def countHoles(): Unit = {
+          io.combHole1 := comPayload.pattern === 0.U
+          io.combHole2 := comPayload.pattern === 1.U
+          io.combHole3 := comPayload.pattern >= 2.U && comPayload.pattern <= 3.U
+          io.combHole4 := comPayload.pattern >= 4.U && comPayload.pattern <= 8.U
+          io.combHole5 := comPayload.pattern >= 9.U && comPayload.pattern <= 22.U
+          io.combHole6 := comPayload.pattern >= 23.U
+        }
+
         when(/*!needUpdate*/!stuckAll) {
           when(app1Valid === 0.U) {
             // only spine
@@ -242,6 +273,8 @@ class DataPath extends Module {
             preFetch(reductionStk.io.din(0).payload)
             // =========== profiling ports =============
             io.combRed := true.B
+            io.combApp0 := true.B
+            countHoles()
             io.heapUpdImp := needUpdate
             io.pipeImp := needWrite
           }.elsewhen(needWrite || needUpdate) {
@@ -254,6 +287,8 @@ class DataPath extends Module {
             preFetch(reductionStk.io.din(0).payload)
             // =========== profiling ports =============
             io.combRed := true.B
+            io.combApp1 := true.B
+            countHoles()
           }.elsewhen(app3Valid === 0.U) {
             // spine + app1 + app2
             stackUpdate()
@@ -262,6 +297,8 @@ class DataPath extends Module {
             pushPipeline(translate(decoder.app2))
             // =========== profiling ports =============
             io.combRed := true.B
+            io.combApp2 := true.B
+            countHoles()
           }.otherwise {
             // spine + app1 + app2 + app3
             stackUpdate()
@@ -271,6 +308,8 @@ class DataPath extends Module {
             pushPipeline(translate(decoder.app3))
             // =========== profiling ports =============
             io.combRed := true.B
+            io.combApp3 := true.B
+            countHoles()
           }
         }
         
@@ -369,7 +408,7 @@ class DataPath extends Module {
     heapBumper := heapBumper + 1.U
     needWrite := false.B
     // =========== profiling ports =============
-    io.combRed := true.B
+    io.combRed_ := true.B
   }
   // ==================================================
 
