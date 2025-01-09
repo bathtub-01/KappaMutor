@@ -178,8 +178,8 @@ class DataPath extends Module {
     when(updateStk.io.elms > 0.U && arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.stackDepth) {  
       needUpdate := true.B
       stuckAll := needWrite || (arity(reductionStk.io.top(0)) > reductionStk.io.elms - updateStk.io.top.previousStackDepth)
-      when(needWrite) { // stall and stuck all the reductions
-        
+      when(needWrite) {
+        // stall and stuck all the reductions
       }.otherwise {
         val toWrite = Wire(new Application)
         toWrite.app.zipWithIndex.foreach { case(atom, idx) =>
