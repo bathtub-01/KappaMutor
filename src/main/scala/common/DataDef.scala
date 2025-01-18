@@ -6,9 +6,12 @@ import chisel3.util._
 import SystemConfig._
 
 /*  
-  FUN: function pointer
-  PTR: heap pointer
-  COM: structured combinator
+ FUN: function pointer
+ COM: structured combinator
+ INT: integer
+ PRM: primitve operator
+ Y: Y combinator
+ ERROR: error code
 */
 object AtomType extends ChiselEnum {
   val NOP = Value

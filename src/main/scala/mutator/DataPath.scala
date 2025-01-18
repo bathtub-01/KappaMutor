@@ -64,6 +64,10 @@ class DataPath extends Module {
     app.count(atom => atom.atomType =/= AtomType.NOP)
   }
 
+  /*
+   If an arity is wrongly too big, update will happen too early, causing duplicated computation.
+   If an arity is wrongly too small, necessary update won't happen, causing wrong results.
+  */
   def arity(atom: Atom): UInt = {
     val res = Wire(UInt(3.W))
     when(atom.atomType === AtomType.NOP || atom.atomType === AtomType.PTR) {
