@@ -14,7 +14,21 @@ import mutator._
 class AllBenchmarks extends AnyFlatSpec
     with Matchers with VerilatorTestRunner with BeforeAndAfterAll {
   val compiled = TestRunnerConfig(withWaveform = false, ephemeral = false).compile(new DataPath)
-  val benchmarks: List[Benchmark] = List(Adjoxo, Braun)
+  val benchmarks: List[Benchmark] = List(
+    Adjoxo,
+    Braun,
+    Clausify,
+    Countdown,
+    Fib,
+    Mss,
+    Ordlist,
+    Permsort,
+    Queens,
+    Queens2,
+    Sumpuz,
+    Taut,
+    While
+  )
   val runningCycle = new PrintWriter("simu-out/running-cycle.csv")
   val heapAlloc = new PrintWriter("simu-out/heap-alloc.csv")
   val combCount = new PrintWriter("simu-out/comb-count.csv")
