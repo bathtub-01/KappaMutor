@@ -19,7 +19,7 @@ You also need an [espresso](https://www.chisel-lang.org/api/latest/chisel3/util/
 
 To generate the SystemVerilog file of the processor, simply run `sbt "runMain mutator.DataPath"`. The generated file will be placed under `./sv-gen/`. You can change the parameters of the processor by configuring `./src/main/scala/common/SystemConfig.scala`.
 
-To run the test with Chisel's simulation framework, run `sbt 'testOnly mutator.AllBenchmarks'`. This will run our compiled Haskell benchmark programs (under `./src/main/scala/benchmarks/`) on KappaMutor. Simulation logs will be generated at `./simu-out/`.
+To run the test with Chisel's simulation framework, run `sbt 'testOnly benchmarks.AllBenchmarks'`. This will run our compiled Haskell benchmark programs (under `./src/main/scala/benchmarks/`) on KappaMutor. Simulation logs will be generated at `./simu-out/`.
 
 ## License
 
