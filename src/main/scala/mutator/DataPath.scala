@@ -83,11 +83,7 @@ class DataPath extends Module {
   }
 
   def isReducible(app: Vec[Atom]): Bool = {
-    // PTR: always
-    // app(0).atomType === AtomType.PTR ||
-    arity(app(0)) < atomCount(app) 
-    // app(0).atomType =/= AtomType.Y &&
-    // app(0).atomType =/= AtomType.PRM
+    arity(app(0)) < atomCount(app)
   }
 
   def preFetch(addr: UInt): Unit = {

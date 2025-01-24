@@ -18,8 +18,8 @@ class XRegStackSimulator(n: Int, depthEach: Int) {
   }
 
   def opGen(stack: List[BigInt]): (Push, Pop) = {
-    val pop = Random.nextInt(min(n, stack.length + 1))
-    val push = Random.nextInt(min(n, maxSize - stack.length - pop + 1))
+    val pop = Random.nextInt(min(n + 1, stack.length + 1))
+    val push = Random.nextInt(min(n + 1, maxSize - stack.length - pop + 1))
     (push, pop)
   }
 
