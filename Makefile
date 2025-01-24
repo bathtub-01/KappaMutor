@@ -1,4 +1,4 @@
-.PHONY: sv-clean test-clean simu-clean simu
+.PHONY: sv-clean test-clean simu-clean simu only
 
 sv-clean:
 	rm -f ./sv-gen/*
@@ -23,3 +23,6 @@ simu-out/comb-count.csv simu-out/app-count.csv simu-out/running-cycle.csv simu-o
 	mkdir simu-out/ -p
 	rm -f ./simu-out/*
 	sbt --mem 4096 'testOnly benchmarks.AllBenchmarks'
+
+only: 
+	sbt --mem 4096 'testOnly mutator.DataPathWave'

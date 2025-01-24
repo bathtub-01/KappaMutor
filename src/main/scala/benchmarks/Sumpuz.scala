@@ -1,12 +1,12 @@
 package benchmarks
 import common.Helper._
  
-// Functions in this file: 38
-// Apps in this file: 133
-// Combinators in this file: 186
+// Functions in this file: 40
+// Apps in this file: 107
+// Combinators in this file: 247
 object Sumpuz extends Benchmark {
 override def toString() = "Sumpuz" 
-val combinatorCount = 186
+val combinatorCount = 247
 val prog = Seq(
  // FUN0Sumpuz.main
 appBuilder( // 0
@@ -61,13 +61,15 @@ ptrBuilder(4),
 ),
  // FUN1Sumpuz.count
 appBuilder( // 10
-comBuilder(5,12,List(0, 1, 3, 4, 2)),
+comBuilder(5,11,List(0, 1, 2, 4, 3)),
+comBuilder(4,5,List(0, 1, 3, 2)),
 ptrBuilder(11),
-ptrBuilder(15),
+ptrBuilder(14),
 ),
  // FUN2Sumpuz.sumMap
 appBuilder( // 11
-comBuilder(4,4,List(0, 2, 3, 1)),
+comBuilder(4,5,List(0, 1, 3, 2)),
+comBuilder(3,2,List(0, 2, 1)),
 ptrBuilder(12),
 intBuilder(0),
 ),
@@ -75,645 +77,636 @@ intBuilder(0),
 appBuilder( // 12
 comBuilder(3,3,List(0, 1, 2)),
 yBuilder(),
-ptrBuilder(14),
-),
-appBuilder( // 13
-comBuilder(6,46,List(2, 5, 1, 4, 0, 3)),
-prmBuilder("+"),
-),
-appBuilder( // 14
-comBuilder(5,46,List(3, 4, 0, 1, 2, 4)),
 ptrBuilder(13),
 ),
+appBuilder( // 13
+comBuilder(6,51,List(0, 1, 2, 4, 3, 5)),
+comBuilder(3,6,List(1, 2, 0, 2)),
+comBuilder(6,46,List(0, 3, 1, 5, 2, 4)),
+comBuilder(3,2,List(0, 2, 1)),
+prmBuilder("+"),
+),
  // FUN4Sumpuz.fx
-appBuilder( // 15
+appBuilder( // 14
 comBuilder(5,12,List(0, 1, 4, 3, 2)),
+ptrBuilder(11),
+ptrBuilder(15),
+),
+ // FUN5Sumpuz.fy
+appBuilder( // 15
+comBuilder(4,6,List(0, 1, 2, 3)),
+comBuilder(4,5,List(0, 1, 3, 2)),
 ptrBuilder(11),
 ptrBuilder(16),
 ),
- // FUN5Sumpuz.fy
-appBuilder( // 16
-comBuilder(5,12,List(0, 1, 2, 4, 3)),
-ptrBuilder(11),
-ptrBuilder(17),
-),
  // FUN6Sumpuz.fz
-appBuilder( // 17
-comBuilder(6,23,List(0, 3, 4, 5, 1, 2)),
-ptrBuilder(18),
+appBuilder( // 16
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
+comBuilder(5,10,List(0, 1, 4, 2, 3)),
+comBuilder(4,4,List(0, 3, 1, 2)),
+ptrBuilder(17),
 intBuilder(0),
 intBuilder(1),
 ),
  // FUN7Sumpuz.valid
-appBuilder( // 18
-comBuilder(4,15,List(0, 1, 3, 2, 3)),
-ptrBuilder(25),
+appBuilder( // 17
+comBuilder(5,40,List(0, 1, 4, 2, 3, 4)),
+comBuilder(3,6,List(0, 2, 1, 2)),
+ptrBuilder(22),
 ptrBuilder(24),
-ptrBuilder(23),
+ptrBuilder(21),
+),
+appBuilder( // 18
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
+comBuilder(6,58,List(0, 1, 5, 2, 3, 4)),
+ptrBuilder(27),
+ptrBuilder(30),
+comBuilder(3,2,List(2, 0, 1)),
 ),
 appBuilder( // 19
-comBuilder(3,2,List(2, 0, 1)),
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(18),
 intBuilder(0),
 comBuilder(2,0,List(0)),
 ),
 appBuilder( // 20
-comBuilder(5,9,List(0, 2, 3, 4, 1)),
-ptrBuilder(33),
-ptrBuilder(19),
+comBuilder(6,42,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(5,41,List(0, 1, 2, 4, 3, 4)),
+ptrBuilder(23),
+ptrBuilder(24),
+prmBuilder("=="),
 ),
 appBuilder( // 21
-comBuilder(6,56,List(0, 1, 4, 2, 3, 5)),
-ptrBuilder(26),
-ptrBuilder(27),
-prmBuilder("=="),
-ptrBuilder(27),
+comBuilder(4,14,List(0, 3, 1, 2, 3)),
+ptrBuilder(20),
+ptrBuilder(24),
+ptrBuilder(19),
 ),
 appBuilder( // 22
-comBuilder(5,10,List(0, 1, 4, 2, 3)),
-comBuilder(5,48,List(0, 4, 1, 2, 3, 4)),
-ptrBuilder(21),
-comBuilder(1,0,List(0)),
-ptrBuilder(30),
-),
-appBuilder( // 23
-comBuilder(4,16,List(0, 2, 1, 2, 3)),
-ptrBuilder(22),
-ptrBuilder(20),
-),
-appBuilder( // 24
-comBuilder(5,14,List(0, 3, 1, 2, 4)),
-ptrBuilder(27),
+comBuilder(6,42,List(0, 1, 2, 3, 5, 4)),
+comBuilder(5,22,List(0, 1, 2, 3, 4)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(23),
+ptrBuilder(24),
 prmBuilder("=="),
-ptrBuilder(27),
-),
-appBuilder( // 25
-comBuilder(5,44,List(0, 1, 3, 2, 3, 4)),
-ptrBuilder(26),
 ),
  // FUN8Data.Bool.&&
-appBuilder( // 26
+appBuilder( // 23
 comBuilder(2,1,List(1, 0)),
 comBuilder(2,0,List(0)),
 ),
  // FUN9NanoPrelude.length
-appBuilder( // 27
+appBuilder( // 24
 yBuilder(),
-ptrBuilder(29),
+ptrBuilder(26),
 intBuilder(0),
 ),
-appBuilder( // 28
-comBuilder(5,7,List(2, 3, 0, 1)),
+appBuilder( // 25
+comBuilder(6,49,List(0, 1, 4, 5, 2, 3)),
+comBuilder(4,6,List(3, 2, 0, 1)),
+comBuilder(2,0,List(0)),
 prmBuilder("+"),
 intBuilder(1),
 ),
-appBuilder( // 29
-comBuilder(4,16,List(3, 2, 0, 1, 2)),
-ptrBuilder(28),
+appBuilder( // 26
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(2,2,List(0, 1, 1)),
+ptrBuilder(25),
 ),
  // FUN10Sumpuz.isSingleton
-appBuilder( // 30
+appBuilder( // 27
 comBuilder(3,2,List(2, 0, 1)),
 comBuilder(2,0,List(0)),
-ptrBuilder(32),
+ptrBuilder(28),
+),
+appBuilder( // 28
+comBuilder(6,9,List(0, 1, 2, 3, 4)),
+comBuilder(5,16,List(4, 0, 1, 2, 3)),
+ptrBuilder(29),
+comBuilder(3,1,List(0, 1)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+ // FUN11Data.Bool_Type.True
+appBuilder( // 29
+comBuilder(2,0,List(0)),
+comBuilder(1,0,List(0)),
+),
+ // FUN12Sumpuz.solutions
+appBuilder( // 30
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(51),
+ptrBuilder(53),
 ),
 appBuilder( // 31
-comBuilder(3,0,List(0)),
-comBuilder(2,0,List(0)),
+comBuilder(6,32,List(0, 1, 5, 2, 3, 4)),
+ptrBuilder(102),
+ptrBuilder(106),
+intBuilder(1),
+intBuilder(0),
+intBuilder(9),
 ),
 appBuilder( // 32
-comBuilder(4,2,List(3, 0, 1)),
-comBuilder(2,0,List(1)),
-ptrBuilder(31),
+comBuilder(6,52,List(0, 1, 2, 5, 3, 4)),
+ptrBuilder(102),
+ptrBuilder(106),
+ptrBuilder(101),
+intBuilder(1),
+intBuilder(0),
 ),
- // FUN11Sumpuz.solutions
 appBuilder( // 33
-comBuilder(5,39,List(0, 3, 1, 4, 2, 4)),
-ptrBuilder(58),
-ptrBuilder(47),
-ptrBuilder(39),
+comBuilder(5,44,List(0, 1, 4, 2, 4, 3)),
+ptrBuilder(54),
+ptrBuilder(100),
+ptrBuilder(32),
+intBuilder(9),
 ),
 appBuilder( // 34
-comBuilder(5,18,List(0, 1, 4, 2, 3)),
-ptrBuilder(125),
-ptrBuilder(132),
-intBuilder(1),
-intBuilder(0),
+comBuilder(6,31,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
+comBuilder(5,19,List(0, 1, 2, 4, 3)),
+ptrBuilder(81),
+ptrBuilder(33),
+ptrBuilder(54),
 ),
 appBuilder( // 35
-comBuilder(6,30,List(0, 4, 1, 5, 2, 3)),
-ptrBuilder(61),
+comBuilder(3,2,List(0, 2, 1)),
 ptrBuilder(34),
-intBuilder(9),
+ptrBuilder(31),
 ),
 appBuilder( // 36
-comBuilder(6,52,List(0, 1, 2, 5, 3, 4)),
-ptrBuilder(125),
-ptrBuilder(132),
-ptrBuilder(124),
-intBuilder(1),
-intBuilder(0),
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,36,List(0, 1, 2, 3, 5, 4)),
+comBuilder(1,0,List(0)),
+ptrBuilder(81),
 ),
 appBuilder( // 37
-comBuilder(5,44,List(0, 1, 4, 2, 4, 3)),
-ptrBuilder(61),
-ptrBuilder(123),
+comBuilder(6,55,List(0, 1, 2, 3, 5, 4)),
 ptrBuilder(36),
-intBuilder(9),
 ),
 appBuilder( // 38
-comBuilder(3,3,List(0, 1, 2)),
-ptrBuilder(97),
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
 ptrBuilder(37),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(85),
+ptrBuilder(52),
+ptrBuilder(100),
 ),
 appBuilder( // 39
-comBuilder(5,10,List(0, 1, 4, 2, 3)),
-comBuilder(6,52,List(0, 1, 2, 3, 4, 5)),
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
+comBuilder(5,21,List(0, 1, 2, 4, 3)),
+comBuilder(3,2,List(0, 2, 1)),
 ptrBuilder(38),
-ptrBuilder(35),
-ptrBuilder(60),
 ),
 appBuilder( // 40
-comBuilder(4,6,List(0, 3, 1, 2)),
-ptrBuilder(33),
-ptrBuilder(124),
-),
-appBuilder( // 41
-comBuilder(6,38,List(0, 1, 4, 5, 2, 3)),
-ptrBuilder(103),
-ptrBuilder(59),
-ptrBuilder(123),
-),
-appBuilder( // 42
-comBuilder(6,62,List(0, 1, 2, 4, 3, 5)),
-comBuilder(1,0,List(0)),
-ptrBuilder(97),
-),
-appBuilder( // 43
-comBuilder(5,18,List(0, 1, 2, 3, 4)),
-ptrBuilder(42),
-ptrBuilder(41),
-),
-appBuilder( // 44
-comBuilder(6,32,List(0, 1, 2, 4, 5, 3)),
-comBuilder(6,24,List(0, 1, 2, 4, 5, 3)),
-ptrBuilder(43),
-),
-appBuilder( // 45
-comBuilder(3,6,List(0, 2, 1, 2)),
-ptrBuilder(44),
-ptrBuilder(40),
-),
-appBuilder( // 46
-comBuilder(5,48,List(1, 0, 2, 4, 3, 4)),
+comBuilder(6,28,List(0, 1, 2, 5, 3, 4)),
+comBuilder(6,42,List(0, 1, 2, 3, 5, 4)),
+comBuilder(5,39,List(0, 1, 2, 4, 3, 4)),
+comBuilder(4,20,List(0, 1, 3, 2, 3)),
 comBuilder(2,0,List(0)),
 ),
-appBuilder( // 47
-comBuilder(5,15,List(0, 1, 4, 2, 3)),
-comBuilder(5,40,List(0, 1, 2, 4, 3, 4)),
-ptrBuilder(46),
+appBuilder( // 41
+comBuilder(6,49,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,26,List(0, 1, 5, 2, 3, 4)),
+comBuilder(4,17,List(0, 3, 1, 2, 3)),
+ptrBuilder(40),
+ptrBuilder(39),
+ptrBuilder(30),
+),
+appBuilder( // 42
+comBuilder(4,39,List(0, 3, 1, 3, 2, 3)),
+ptrBuilder(41),
+ptrBuilder(101),
+ptrBuilder(35),
+),
+appBuilder( // 43
+comBuilder(6,30,List(0, 5, 1, 2, 3, 4)),
+ptrBuilder(54),
+comBuilder(4,2,List(3, 0, 1)),
+intBuilder(1),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 44
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(43),
+ptrBuilder(53),
+),
+appBuilder( // 45
+comBuilder(5,9,List(0, 4, 1, 2, 3)),
+ptrBuilder(52),
+prmBuilder("=="),
+intBuilder(1),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 46
+comBuilder(5,39,List(0, 1, 2, 4, 3, 4)),
+comBuilder(6,27,List(0, 1, 2, 5, 3, 4)),
+comBuilder(5,16,List(4, 0, 1, 2, 3)),
 ptrBuilder(45),
+ptrBuilder(44),
+),
+appBuilder( // 47
+comBuilder(6,32,List(0, 1, 5, 2, 3, 4)),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(46),
+comBuilder(3,1,List(0, 1)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
 ),
 appBuilder( // 48
-comBuilder(3,0,List(0)),
+comBuilder(5,9,List(0, 4, 1, 2, 3)),
+ptrBuilder(52),
+prmBuilder("=="),
+intBuilder(0),
 comBuilder(2,0,List(0)),
 ),
 appBuilder( // 49
+comBuilder(5,47,List(0, 4, 1, 2, 4, 3)),
+ptrBuilder(48),
 comBuilder(4,2,List(3, 0, 1)),
-intBuilder(1),
+ptrBuilder(53),
 comBuilder(2,0,List(0)),
 ),
 appBuilder( // 50
-comBuilder(5,9,List(0, 4, 1, 2, 3)),
-ptrBuilder(59),
-prmBuilder("=="),
-intBuilder(1),
-comBuilder(2,0,List(0)),
+comBuilder(5,57,List(2, 3, 0, 4, 1, 4)),
+ptrBuilder(49),
+ptrBuilder(47),
 ),
 appBuilder( // 51
-comBuilder(6,24,List(0, 1, 5, 2, 3, 4)),
-comBuilder(6,56,List(0, 1, 5, 2, 3, 4)),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,42,List(0, 1, 2, 3, 5, 4)),
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+comBuilder(3,6,List(0, 2, 1, 2)),
 ptrBuilder(50),
-ptrBuilder(61),
-ptrBuilder(49),
-ptrBuilder(60),
+ptrBuilder(42),
 ),
+ // FUN13NanoPrelude.fst
 appBuilder( // 52
-comBuilder(5,32,List(4, 0, 2, 2, 3, 1)),
-ptrBuilder(51),
-ptrBuilder(48),
+comBuilder(2,1,List(1, 0)),
+comBuilder(2,0,List(0)),
 ),
+ // FUN14NanoPrelude.snd
 appBuilder( // 53
-comBuilder(5,5,List(4, 0, 2, 1)),
-ptrBuilder(60),
+comBuilder(3,3,List(2, 0, 1)),
 comBuilder(2,0,List(0)),
+comBuilder(1,0,List(0)),
 ),
+ // FUN15Sumpuz.bindings
 appBuilder( // 54
-comBuilder(5,9,List(0, 4, 1, 2, 3)),
-ptrBuilder(59),
-prmBuilder("=="),
-intBuilder(0),
-comBuilder(2,0,List(0)),
-),
-appBuilder( // 55
-comBuilder(4,20,List(2, 0, 3, 1, 3)),
-ptrBuilder(54),
-ptrBuilder(53),
-),
-appBuilder( // 56
-comBuilder(5,56,List(2, 0, 3, 4, 1, 4)),
-ptrBuilder(55),
-ptrBuilder(52),
-),
-appBuilder( // 57
-comBuilder(5,29,List(0, 1, 4, 2, 4, 3)),
-comBuilder(4,48,List(0, 3, 1, 3, 2, 3)),
-),
-appBuilder( // 58
-comBuilder(3,3,List(0, 1, 2)),
-ptrBuilder(57),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(61),
 ptrBuilder(56),
 ),
- // FUN12NanoPrelude.fst
-appBuilder( // 59
-comBuilder(2,1,List(1, 0)),
-comBuilder(2,0,List(0)),
-),
- // FUN13NanoPrelude.snd
-appBuilder( // 60
-comBuilder(2,1,List(1, 0)),
-comBuilder(2,0,List(1)),
-),
- // FUN14Sumpuz.bindings
-appBuilder( // 61
-comBuilder(4,5,List(0, 1, 3, 2)),
-comBuilder(4,42,List(0, 2, 3, 1, 2, 3)),
-ptrBuilder(69),
-ptrBuilder(63),
-),
-appBuilder( // 62
+appBuilder( // 55
 comBuilder(4,2,List(3, 1, 0)),
 comBuilder(2,0,List(0)),
 ),
-appBuilder( // 63
-comBuilder(6,37,List(0, 5, 3, 1, 2, 4)),
-ptrBuilder(94),
-comBuilder(2,0,List(0)),
-ptrBuilder(62),
-),
-appBuilder( // 64
-comBuilder(4,6,List(0, 2, 1, 3)),
-ptrBuilder(84),
-ptrBuilder(93),
-),
-appBuilder( // 65
-comBuilder(6,44,List(0, 1, 3, 2, 4, 5)),
+appBuilder( // 56
+comBuilder(6,37,List(0, 1, 4, 2, 3, 5)),
+comBuilder(5,9,List(0, 4, 1, 2, 3)),
 ptrBuilder(79),
-ptrBuilder(83),
-ptrBuilder(64),
-),
-appBuilder( // 66
-comBuilder(5,40,List(0, 1, 2, 4, 3, 4)),
-ptrBuilder(75),
-comBuilder(3,2,List(0, 2, 1)),
-ptrBuilder(78),
-),
-appBuilder( // 67
-comBuilder(4,7,List(0, 1, 2, 3)),
-ptrBuilder(66),
-ptrBuilder(65),
-),
-appBuilder( // 68
-comBuilder(5,42,List(0, 1, 4, 2, 3, 4)),
-ptrBuilder(70),
-),
-appBuilder( // 69
-comBuilder(3,6,List(0, 2, 1, 2)),
-ptrBuilder(68),
-ptrBuilder(67),
-),
- // FUN15NanoPrelude.lookup
-appBuilder( // 70
-comBuilder(3,3,List(0, 1, 2)),
-yBuilder(),
-ptrBuilder(74),
-),
-appBuilder( // 71
-comBuilder(5,14,List(1, 0, 4, 2, 3)),
-prmBuilder("=="),
-),
-appBuilder( // 72
-comBuilder(4,5,List(0, 1, 3, 2)),
-comBuilder(6,37,List(0, 2, 3, 4, 1, 5)),
-ptrBuilder(71),
-comBuilder(3,1,List(2, 0)),
-),
-appBuilder( // 73
-comBuilder(5,18,List(3, 0, 1, 2, 4)),
-ptrBuilder(72),
-),
-appBuilder( // 74
-comBuilder(5,16,List(4, 0, 1, 2, 3)),
 comBuilder(2,0,List(0)),
+ptrBuilder(55),
+),
+appBuilder( // 57
+comBuilder(6,31,List(0, 1, 2, 3, 5, 4)),
+comBuilder(5,11,List(0, 1, 2, 4, 3)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(69),
+ptrBuilder(72),
 ptrBuilder(73),
 ),
- // FUN16NanoPrelude.map
-appBuilder( // 75
+appBuilder( // 58
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(57),
+ptrBuilder(78),
+),
+appBuilder( // 59
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(68),
+),
+appBuilder( // 60
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(5,14,List(0, 1, 2, 3, 4)),
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+ptrBuilder(66),
+ptrBuilder(59),
+ptrBuilder(58),
+),
+appBuilder( // 61
+comBuilder(5,39,List(0, 1, 2, 4, 3, 4)),
+comBuilder(5,39,List(0, 1, 2, 4, 3, 4)),
+comBuilder(4,39,List(0, 3, 1, 3, 2, 3)),
+ptrBuilder(62),
+ptrBuilder(60),
+),
+ // FUN16NanoPrelude.lookup
+appBuilder( // 62
 comBuilder(3,3,List(0, 1, 2)),
 yBuilder(),
-ptrBuilder(77),
+ptrBuilder(64),
 ),
-appBuilder( // 76
-comBuilder(5,15,List(0, 1, 3, 2, 4)),
-comBuilder(4,2,List(3, 0, 1)),
+appBuilder( // 63
+comBuilder(6,28,List(0, 1, 2, 5, 3, 4)),
+comBuilder(6,28,List(0, 1, 2, 4, 5, 3)),
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+prmBuilder("=="),
+ptrBuilder(65),
 ),
-appBuilder( // 77
-comBuilder(5,16,List(4, 0, 1, 2, 3)),
+appBuilder( // 64
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(5,14,List(0, 1, 2, 3, 4)),
+comBuilder(4,6,List(3, 0, 1, 2)),
 comBuilder(2,0,List(0)),
+comBuilder(3,3,List(1, 0, 2)),
+ptrBuilder(63),
+),
+ // FUN17NanoPrelude.Just
+appBuilder( // 65
+comBuilder(3,1,List(0, 1)),
+comBuilder(2,1,List(1, 0)),
+),
+ // FUN18NanoPrelude.map
+appBuilder( // 66
+comBuilder(6,56,List(0, 1, 2, 3, 4, 5)),
+yBuilder(),
+comBuilder(4,6,List(0, 1, 2, 3)),
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+ptrBuilder(67),
+),
+appBuilder( // 67
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(68),
+),
+ // FUN19Data.List_Type.:
+appBuilder( // 68
+comBuilder(4,2,List(0, 1, 2)),
+comBuilder(3,2,List(2, 0, 1)),
+),
+ // FUN20NanoPrelude.zip
+appBuilder( // 69
+comBuilder(4,5,List(0, 3, 1, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(2,0,List(0)),
+ptrBuilder(71),
+),
+appBuilder( // 70
+comBuilder(6,35,List(0, 1, 2, 3, 5, 4)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(68),
+comBuilder(3,2,List(2, 0, 1)),
+),
+appBuilder( // 71
+comBuilder(6,25,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,11,List(0, 1, 2, 4, 3)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(2,0,List(0)),
+ptrBuilder(70),
+ptrBuilder(69),
+),
+ // FUN21NanoPrelude.repeat
+appBuilder( // 72
+comBuilder(3,6,List(0, 2, 1, 2)),
+ptrBuilder(68),
+ptrBuilder(72),
+),
+ // FUN22Sumpuz.diff
+appBuilder( // 73
+ptrBuilder(75),
+ptrBuilder(74),
+),
+appBuilder( // 74
+comBuilder(3,2,List(0, 2, 1)),
 ptrBuilder(76),
 ),
- // FUN17Data.List_Type.:
-appBuilder( // 78
-comBuilder(4,2,List(3, 0, 1)),
+ // FUN23NanoPrelude.foldl
+appBuilder( // 75
+comBuilder(5,18,List(0, 1, 2, 3, 4)),
+yBuilder(),
+comBuilder(5,28,List(0, 1, 3, 2, 4, 4)),
+comBuilder(5,16,List(4, 3, 0, 1, 2)),
+comBuilder(3,3,List(0, 1, 2)),
 ),
- // FUN18NanoPrelude.zip
+ // FUN24Sumpuz.del
+appBuilder( // 76
+comBuilder(6,56,List(0, 1, 2, 3, 4, 5)),
+yBuilder(),
+comBuilder(4,6,List(0, 1, 2, 3)),
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+ptrBuilder(77),
+),
+appBuilder( // 77
+comBuilder(5,11,List(0, 1, 4, 2, 3)),
+comBuilder(5,29,List(0, 1, 4, 2, 4, 3)),
+comBuilder(4,13,List(0, 1, 2, 3, 3)),
+prmBuilder("=="),
+ptrBuilder(68),
+),
+ // FUN25Sumpuz.rng
+appBuilder( // 78
+ptrBuilder(66),
+ptrBuilder(53),
+),
+ // FUN26NanoPrelude.elem
 appBuilder( // 79
-comBuilder(4,6,List(2, 0, 1, 3)),
+comBuilder(6,56,List(0, 1, 2, 3, 4, 5)),
+yBuilder(),
+comBuilder(4,6,List(0, 1, 2, 3)),
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+ptrBuilder(80),
+),
+appBuilder( // 80
+comBuilder(5,11,List(0, 1, 4, 2, 3)),
+comBuilder(5,10,List(0, 1, 4, 3, 2)),
+comBuilder(4,5,List(0, 1, 3, 2)),
+prmBuilder("=="),
+ptrBuilder(29),
+),
+ // FUN27Sumpuz.ofAll
+appBuilder( // 81
+comBuilder(6,56,List(0, 1, 2, 3, 4, 5)),
+yBuilder(),
+comBuilder(4,6,List(0, 1, 2, 3)),
+comBuilder(3,2,List(2, 0, 1)),
 comBuilder(2,0,List(0)),
 ptrBuilder(82),
 ),
-appBuilder( // 80
-comBuilder(6,44,List(0, 1, 4, 2, 3, 5)),
-comBuilder(4,2,List(3, 0, 1)),
-),
-appBuilder( // 81
-comBuilder(4,5,List(0, 1, 3, 2)),
-ptrBuilder(80),
-comBuilder(3,2,List(2, 0, 1)),
-ptrBuilder(79),
-),
 appBuilder( // 82
-comBuilder(5,16,List(2, 0, 1, 3, 4)),
-comBuilder(2,0,List(0)),
-ptrBuilder(81),
-),
- // FUN19NanoPrelude.repeat
-appBuilder( // 83
-comBuilder(3,6,List(0, 2, 1, 2)),
-comBuilder(4,2,List(3, 0, 1)),
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
 ptrBuilder(83),
 ),
- // FUN20Sumpuz.diff
-appBuilder( // 84
-ptrBuilder(86),
-ptrBuilder(85),
-),
-appBuilder( // 85
+ // FUN28Data.List_Type.++
+appBuilder( // 83
 comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(84),
+),
+appBuilder( // 84
+comBuilder(6,51,List(0, 1, 2, 3, 4, 5)),
+yBuilder(),
+comBuilder(6,46,List(5, 3, 0, 1, 2, 4)),
+comBuilder(4,5,List(0, 1, 3, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(68),
+),
+ // FUN29Sumpuz.solns
+appBuilder( // 85
+comBuilder(4,7,List(0, 1, 3, 2)),
+ptrBuilder(92),
 ptrBuilder(88),
 ),
- // FUN21NanoPrelude.foldl
 appBuilder( // 86
-comBuilder(3,3,List(0, 1, 2)),
-yBuilder(),
-ptrBuilder(87),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(98),
 ),
 appBuilder( // 87
-comBuilder(5,46,List(4, 3, 0, 1, 2, 3)),
-comBuilder(4,7,List(1, 0, 2, 3)),
+comBuilder(6,37,List(0, 1, 4, 2, 3, 5)),
+comBuilder(5,37,List(0, 4, 1, 2, 3, 4)),
+ptrBuilder(98),
+prmBuilder("+"),
+ptrBuilder(86),
 ),
- // FUN22Sumpuz.del
 appBuilder( // 88
-comBuilder(3,3,List(0, 1, 2)),
-yBuilder(),
-ptrBuilder(92),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
+comBuilder(5,18,List(0, 1, 4, 2, 3)),
+ptrBuilder(94),
+ptrBuilder(87),
+prmBuilder("+"),
 ),
 appBuilder( // 89
-comBuilder(4,6,List(0, 2, 1, 3)),
+comBuilder(6,24,List(0, 1, 5, 2, 3, 4)),
+comBuilder(6,33,List(0, 1, 2, 5, 3, 4)),
+ptrBuilder(54),
 comBuilder(4,2,List(3, 0, 1)),
+ptrBuilder(53),
+comBuilder(2,0,List(0)),
 ),
 appBuilder( // 90
-comBuilder(5,28,List(1, 0, 2, 3, 4, 4)),
-prmBuilder("=="),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(5,41,List(0, 1, 2, 4, 3, 4)),
+ptrBuilder(81),
+ptrBuilder(93),
+ptrBuilder(52),
 ),
 appBuilder( // 91
-comBuilder(5,42,List(0, 2, 4, 1, 3, 4)),
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,6,List(0, 2, 1, 2)),
 ptrBuilder(90),
 ptrBuilder(89),
 ),
 appBuilder( // 92
-comBuilder(5,16,List(4, 0, 1, 2, 3)),
-comBuilder(2,0,List(0)),
+comBuilder(3,3,List(0, 1, 2)),
 ptrBuilder(91),
 ),
- // FUN23Sumpuz.rng
+ // FUN30NanoPrelude.curry
 appBuilder( // 93
-ptrBuilder(75),
-ptrBuilder(60),
-),
- // FUN24NanoPrelude.elem
-appBuilder( // 94
-comBuilder(3,3,List(0, 1, 2)),
-yBuilder(),
-ptrBuilder(96),
-),
-appBuilder( // 95
-comBuilder(6,28,List(2, 0, 4, 3, 5, 1)),
-prmBuilder("=="),
-comBuilder(2,0,List(1)),
-),
-appBuilder( // 96
-comBuilder(5,16,List(4, 0, 1, 2, 3)),
-comBuilder(2,0,List(0)),
-ptrBuilder(95),
-),
- // FUN25Sumpuz.ofAll
-appBuilder( // 97
-comBuilder(3,3,List(0, 1, 2)),
-yBuilder(),
-ptrBuilder(99),
-),
-appBuilder( // 98
-comBuilder(5,15,List(0, 1, 3, 2, 4)),
-ptrBuilder(100),
-),
-appBuilder( // 99
-comBuilder(5,16,List(4, 0, 1, 2, 3)),
-comBuilder(2,0,List(0)),
-ptrBuilder(98),
-),
- // FUN26Data.List_Type.++
-appBuilder( // 100
-comBuilder(4,5,List(0, 1, 3, 2)),
-yBuilder(),
-ptrBuilder(102),
-),
-appBuilder( // 101
-comBuilder(4,6,List(0, 2, 1, 3)),
-comBuilder(4,2,List(3, 0, 1)),
-),
-appBuilder( // 102
-comBuilder(4,6,List(3, 1, 0, 2)),
-ptrBuilder(101),
-),
- // FUN27Sumpuz.solns
-appBuilder( // 103
-comBuilder(5,18,List(0, 1, 2, 3, 4)),
-ptrBuilder(114),
-ptrBuilder(108),
-),
-appBuilder( // 104
-comBuilder(3,2,List(0, 2, 1)),
-ptrBuilder(121),
-),
-appBuilder( // 105
-comBuilder(5,37,List(0, 4, 2, 1, 3, 4)),
-ptrBuilder(121),
-prmBuilder("+"),
-),
-appBuilder( // 106
-comBuilder(4,6,List(0, 2, 1, 3)),
-ptrBuilder(105),
-ptrBuilder(104),
-),
-appBuilder( // 107
-comBuilder(6,51,List(0, 1, 4, 5, 2, 3)),
-ptrBuilder(116),
-),
-appBuilder( // 108
-comBuilder(5,10,List(0, 1, 4, 2, 3)),
-ptrBuilder(107),
-ptrBuilder(106),
-prmBuilder("+"),
-),
-appBuilder( // 109
-comBuilder(5,5,List(4, 0, 2, 1)),
-ptrBuilder(60),
-comBuilder(2,0,List(0)),
-),
-appBuilder( // 110
-comBuilder(5,11,List(0, 2, 1, 4, 3)),
-ptrBuilder(61),
-ptrBuilder(109),
-),
-appBuilder( // 111
-comBuilder(5,20,List(0, 1, 3, 2, 4)),
-ptrBuilder(97),
-ptrBuilder(115),
-ptrBuilder(59),
-),
-appBuilder( // 112
-comBuilder(5,42,List(0, 2, 4, 1, 3, 4)),
-ptrBuilder(111),
-),
-appBuilder( // 113
-comBuilder(3,3,List(0, 1, 2)),
-ptrBuilder(112),
-ptrBuilder(110),
-),
-appBuilder( // 114
-comBuilder(5,37,List(0, 2, 3, 4, 1, 4)),
-ptrBuilder(113),
-),
- // FUN28NanoPrelude.curry
-appBuilder( // 115
 comBuilder(4,7,List(1, 0, 2, 3)),
 comBuilder(3,2,List(2, 0, 1)),
 ),
- // FUN29Sumpuz.divMod10
-appBuilder( // 116
-comBuilder(3,6,List(0, 2, 1, 2)),
-ptrBuilder(120),
-ptrBuilder(117),
-),
-appBuilder( // 117
+ // FUN31Sumpuz.divMod10
+appBuilder( // 94
+comBuilder(4,16,List(0, 3, 1, 2, 3)),
+ptrBuilder(97),
 comBuilder(3,2,List(2, 0, 1)),
 intBuilder(0),
 ),
-appBuilder( // 118
-comBuilder(5,12,List(4, 2, 0, 1, 3)),
+appBuilder( // 95
+comBuilder(4,7,List(0, 3, 1, 2)),
+comBuilder(3,2,List(2, 0, 1)),
 prmBuilder("+"),
 intBuilder(1),
 ),
-appBuilder( // 119
+appBuilder( // 96
 comBuilder(5,12,List(0, 4, 1, 2, 3)),
-ptrBuilder(116),
+ptrBuilder(94),
 prmBuilder("-"),
 intBuilder(10),
-ptrBuilder(118),
+ptrBuilder(95),
 ),
-appBuilder( // 120
+appBuilder( // 97
 comBuilder(4,14,List(3, 0, 1, 2, 3)),
 prmBuilder("<="),
 intBuilder(9),
-ptrBuilder(119),
+ptrBuilder(96),
 ),
- // FUN30Sumpuz.img
-appBuilder( // 121
+ // FUN32Sumpuz.img
+appBuilder( // 98
 comBuilder(4,7,List(0, 1, 3, 2)),
-ptrBuilder(122),
-ptrBuilder(70),
+ptrBuilder(99),
+ptrBuilder(62),
 ),
- // FUN31NanoPrelude.fromJust
-appBuilder( // 122
+ // FUN33NanoPrelude.fromJust
+appBuilder( // 99
 comBuilder(3,2,List(2, 0, 1)),
 errorBuilder(4),
 comBuilder(1,0,List(0)),
 ),
- // FUN32NanoPrelude.head
-appBuilder( // 123
+ // FUN34NanoPrelude.head
+appBuilder( // 100
 comBuilder(3,2,List(2, 0, 1)),
 errorBuilder(3),
 comBuilder(2,0,List(0)),
 ),
- // FUN33NanoPrelude.tail
-appBuilder( // 124
-comBuilder(3,2,List(2, 0, 1)),
+ // FUN35NanoPrelude.tail
+appBuilder( // 101
+comBuilder(4,6,List(3, 0, 1, 2)),
 comBuilder(2,0,List(0)),
-comBuilder(2,0,List(1)),
+comBuilder(2,0,List(0)),
+comBuilder(1,0,List(0)),
 ),
- // FUN34NanoPrelude.enumFromTo
-appBuilder( // 125
-comBuilder(5,15,List(0, 1, 4, 2, 3)),
-ptrBuilder(127),
-ptrBuilder(126),
-ptrBuilder(131),
-),
-appBuilder( // 126
+ // FUN36NanoPrelude.enumFromTo
+appBuilder( // 102
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
+comBuilder(5,12,List(0, 1, 2, 4, 3)),
+ptrBuilder(103),
 comBuilder(3,2,List(2, 0, 1)),
 prmBuilder("<="),
+ptrBuilder(105),
 ),
- // FUN35NanoPrelude.takeWhile
-appBuilder( // 127
-comBuilder(3,3,List(0, 1, 2)),
+ // FUN37NanoPrelude.takeWhile
+appBuilder( // 103
+comBuilder(5,20,List(0, 1, 2, 3, 4)),
 yBuilder(),
-ptrBuilder(130),
-),
-appBuilder( // 128
-comBuilder(4,6,List(0, 2, 1, 3)),
-comBuilder(4,2,List(3, 0, 1)),
-),
-appBuilder( // 129
-comBuilder(5,42,List(1, 3, 0, 2, 3, 4)),
+comBuilder(4,6,List(3, 0, 1, 2)),
 comBuilder(2,0,List(0)),
+ptrBuilder(104),
 ),
-appBuilder( // 130
-comBuilder(6,48,List(5, 0, 1, 3, 2, 4)),
+appBuilder( // 104
+comBuilder(6,51,List(0, 1, 2, 3, 4, 5)),
+comBuilder(3,2,List(0, 2, 1)),
+comBuilder(5,40,List(0, 3, 4, 1, 2, 4)),
+comBuilder(4,8,List(0, 1, 2, 3)),
 comBuilder(2,0,List(0)),
-ptrBuilder(129),
-ptrBuilder(128),
+ptrBuilder(68),
 ),
- // FUN36NanoPrelude.enumFrom
-appBuilder( // 131
+ // FUN38NanoPrelude.enumFrom
+appBuilder( // 105
 comBuilder(5,49,List(0, 4, 1, 4, 2, 3)),
-comBuilder(4,2,List(3, 0, 1)),
-ptrBuilder(131),
+ptrBuilder(68),
+ptrBuilder(105),
 prmBuilder("+"),
 intBuilder(1),
 ),
- // FUN37Sumpuz.ifNull
-appBuilder( // 132
-comBuilder(4,6,List(1, 2, 0, 3)),
-comBuilder(3,0,List(0)),
+ // FUN39Sumpuz.ifNull
+appBuilder( // 106
+comBuilder(5,10,List(0, 3, 4, 1, 2)),
+comBuilder(4,7,List(0, 1, 2, 3)),
+comBuilder(3,1,List(0, 1)),
+comBuilder(2,0,List(0)),
 ),
 )
 }

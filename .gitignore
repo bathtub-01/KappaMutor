@@ -355,4 +355,4 @@ test-gen/
 simu-out/
 
 # MicroHS generated ROM file
-ProgramBin.scala
+# ProgramBin.scala

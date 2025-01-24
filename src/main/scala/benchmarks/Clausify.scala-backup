@@ -1,0 +1,844 @@
+package benchmarks
+import common.Helper._
+ 
+// Functions in this file: 41
+// Apps in this file: 148
+// Combinators in this file: 230
+object Clausify extends Benchmark {
+override def toString() = "Clausify" 
+val combinatorCount = 230
+val prog = Seq(
+ // FUN0Clausify.main
+appBuilder( // 0
+ptrBuilder(16),
+ptrBuilder(15),
+),
+appBuilder( // 1
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 2
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 3
+ptrBuilder(145),
+ptrBuilder(2),
+ptrBuilder(1),
+),
+appBuilder( // 4
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 5
+ptrBuilder(145),
+ptrBuilder(4),
+ptrBuilder(3),
+),
+appBuilder( // 6
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 7
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 8
+ptrBuilder(145),
+ptrBuilder(7),
+ptrBuilder(6),
+),
+appBuilder( // 9
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 10
+ptrBuilder(145),
+ptrBuilder(9),
+ptrBuilder(8),
+),
+appBuilder( // 11
+ptrBuilder(145),
+ptrBuilder(10),
+ptrBuilder(5),
+),
+appBuilder( // 12
+ptrBuilder(142),
+intBuilder(2),
+ptrBuilder(11),
+),
+appBuilder( // 13
+ptrBuilder(114),
+intBuilder(0),
+),
+appBuilder( // 14
+ptrBuilder(21),
+ptrBuilder(118),
+ptrBuilder(13),
+ptrBuilder(12),
+),
+appBuilder( // 15
+ptrBuilder(24),
+ptrBuilder(14),
+),
+ // FUN1Clausify.display
+appBuilder( // 16
+comBuilder(3,2,List(2, 0, 1)),
+intBuilder(0),
+ptrBuilder(17),
+),
+appBuilder( // 17
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(18),
+prmBuilder("+"),
+ptrBuilder(16),
+),
+ // FUN2Clausify.emitClause
+appBuilder( // 18
+comBuilder(2,1,List(1, 0)),
+ptrBuilder(19),
+),
+appBuilder( // 19
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(20),
+prmBuilder("+"),
+ptrBuilder(20),
+),
+ // FUN3NanoPrelude.sum
+appBuilder( // 20
+ptrBuilder(21),
+prmBuilder("+"),
+intBuilder(0),
+),
+ // FUN4NanoPrelude.foldr
+appBuilder( // 21
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(23),
+ptrBuilder(22),
+),
+appBuilder( // 22
+comBuilder(4,5,List(0, 1, 3, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+),
+appBuilder( // 23
+comBuilder(5,19,List(0, 1, 2, 4, 3)),
+yBuilder(),
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(3,2,List(2, 0, 1)),
+),
+ // FUN5Clausify.clausify
+appBuilder( // 24
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(26),
+ptrBuilder(25),
+),
+appBuilder( // 25
+comBuilder(6,64,List(0, 1, 2, 3, 4, 5)),
+ptrBuilder(63),
+ptrBuilder(73),
+ptrBuilder(100),
+ptrBuilder(115),
+ptrBuilder(133),
+),
+ // FUN6Clausify.uniq
+appBuilder( // 26
+ptrBuilder(21),
+ptrBuilder(28),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 27
+ptrBuilder(30),
+ptrBuilder(48),
+),
+appBuilder( // 28
+ptrBuilder(29),
+ptrBuilder(27),
+ptrBuilder(62),
+),
+ // FUN7Clausify.comp
+appBuilder( // 29
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(1,0,List(0)),
+comBuilder(3,3,List(0, 1, 2)),
+),
+ // FUN8Clausify.union
+appBuilder( // 30
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(33),
+ptrBuilder(32),
+ptrBuilder(44),
+),
+appBuilder( // 31
+ptrBuilder(29),
+ptrBuilder(42),
+),
+appBuilder( // 32
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(38),
+ptrBuilder(31),
+),
+appBuilder( // 33
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(34),
+),
+ // FUN9Data.List_Type.++
+appBuilder( // 34
+comBuilder(6,33,List(0, 1, 2, 5, 3, 4)),
+yBuilder(),
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(35),
+),
+appBuilder( // 35
+comBuilder(4,5,List(0, 1, 3, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(36),
+),
+ // FUN10Data.List_Type.:
+appBuilder( // 36
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(37),
+comBuilder(3,2,List(2, 0, 1)),
+),
+appBuilder( // 37
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(2,0,List(0)),
+),
+ // FUN11NanoPrelude.filter
+appBuilder( // 38
+comBuilder(5,19,List(0, 1, 2, 4, 3)),
+yBuilder(),
+ptrBuilder(41),
+ptrBuilder(39),
+ptrBuilder(36),
+),
+appBuilder( // 39
+comBuilder(5,38,List(0, 1, 4, 2, 3, 4)),
+comBuilder(5,45,List(0, 1, 4, 2, 3, 4)),
+),
+appBuilder( // 40
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 41
+comBuilder(5,54,List(0, 1, 2, 4, 3, 4)),
+ptrBuilder(40),
+comBuilder(3,2,List(0, 2, 1)),
+),
+ // FUN12Data.Bool.not
+appBuilder( // 42
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(43),
+comBuilder(2,0,List(0)),
+),
+ // FUN13Data.Bool_Type.True
+appBuilder( // 43
+comBuilder(2,0,List(0)),
+comBuilder(1,0,List(0)),
+),
+ // FUN14Clausify.contains
+appBuilder( // 44
+comBuilder(5,22,List(0, 1, 2, 3, 4)),
+yBuilder(),
+comBuilder(1,0,List(0)),
+ptrBuilder(46),
+ptrBuilder(45),
+),
+appBuilder( // 45
+comBuilder(6,35,List(0, 1, 2, 5, 3, 4)),
+comBuilder(4,7,List(0, 1, 3, 2)),
+ptrBuilder(47),
+),
+appBuilder( // 46
+comBuilder(6,24,List(0, 5, 1, 2, 3, 4)),
+comBuilder(5,54,List(0, 1, 2, 4, 3, 4)),
+comBuilder(2,0,List(0)),
+comBuilder(3,2,List(0, 2, 1)),
+),
+ // FUN15Data.Bool.||
+appBuilder( // 47
+comBuilder(3,2,List(0, 2, 1)),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(43),
+),
+ // FUN16Clausify.eqClause
+appBuilder( // 48
+comBuilder(3,2,List(0, 2, 1)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(52),
+),
+appBuilder( // 49
+ptrBuilder(54),
+ptrBuilder(61),
+),
+appBuilder( // 50
+ptrBuilder(54),
+ptrBuilder(61),
+),
+appBuilder( // 51
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(53),
+),
+appBuilder( // 52
+comBuilder(6,24,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(51),
+ptrBuilder(50),
+ptrBuilder(49),
+),
+ // FUN17Data.Bool.&&
+appBuilder( // 53
+comBuilder(3,3,List(0, 2, 1)),
+comBuilder(1,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+ // FUN18Clausify.eqList
+appBuilder( // 54
+comBuilder(5,22,List(0, 1, 2, 3, 4)),
+yBuilder(),
+ptrBuilder(60),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(56),
+),
+appBuilder( // 55
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(53),
+),
+appBuilder( // 56
+comBuilder(6,27,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(2,0,List(0)),
+ptrBuilder(55),
+),
+appBuilder( // 57
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 58
+comBuilder(2,0,List(0)),
+ptrBuilder(57),
+),
+appBuilder( // 59
+comBuilder(5,9,List(0, 4, 1, 2, 3)),
+comBuilder(5,40,List(0, 4, 1, 2, 3, 4)),
+ptrBuilder(43),
+ptrBuilder(58),
+),
+appBuilder( // 60
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(59),
+),
+ // FUN19Clausify.eq
+appBuilder( // 61
+comBuilder(3,3,List(0, 2, 1)),
+comBuilder(1,0,List(0)),
+prmBuilder("=="),
+),
+ // FUN20Clausify.singleton
+appBuilder( // 62
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(36),
+comBuilder(2,0,List(0)),
+),
+ // FUN21Clausify.nonTaut
+appBuilder( // 63
+ptrBuilder(38),
+ptrBuilder(64),
+),
+ // FUN22Clausify.notTaut
+appBuilder( // 64
+comBuilder(2,1,List(1, 0)),
+ptrBuilder(67),
+),
+appBuilder( // 65
+ptrBuilder(71),
+ptrBuilder(61),
+),
+appBuilder( // 66
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(68),
+),
+appBuilder( // 67
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(66),
+ptrBuilder(65),
+),
+ // FUN23NanoPrelude.null
+appBuilder( // 68
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(43),
+ptrBuilder(70),
+),
+appBuilder( // 69
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 70
+comBuilder(2,0,List(0)),
+ptrBuilder(69),
+),
+ // FUN24Clausify.inter
+appBuilder( // 71
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(72),
+ptrBuilder(44),
+),
+appBuilder( // 72
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(1,0,List(0)),
+ptrBuilder(38),
+),
+ // FUN25Clausify.clauses
+appBuilder( // 73
+ptrBuilder(76),
+ptrBuilder(75),
+),
+appBuilder( // 74
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 75
+ptrBuilder(80),
+ptrBuilder(74),
+),
+ // FUN26NanoPrelude.map
+appBuilder( // 76
+comBuilder(4,8,List(0, 1, 2, 3)),
+yBuilder(),
+ptrBuilder(79),
+ptrBuilder(77),
+),
+appBuilder( // 77
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(36),
+),
+appBuilder( // 78
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 79
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(78),
+),
+ // FUN27Clausify.clause
+appBuilder( // 80
+comBuilder(4,4,List(0, 3, 1, 2)),
+ptrBuilder(94),
+ptrBuilder(82),
+ptrBuilder(81),
+),
+appBuilder( // 81
+comBuilder(3,2,List(2, 0, 1)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 82
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(95),
+),
+appBuilder( // 83
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 84
+comBuilder(5,41,List(0, 1, 2, 4, 3, 4)),
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+ptrBuilder(83),
+),
+appBuilder( // 85
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(1,0,List(0)),
+ptrBuilder(80),
+),
+appBuilder( // 86
+comBuilder(6,36,List(0, 1, 2, 3, 5, 4)),
+comBuilder(5,22,List(0, 1, 2, 3, 4)),
+),
+appBuilder( // 87
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(4,17,List(0, 3, 1, 2, 3)),
+),
+appBuilder( // 88
+comBuilder(5,12,List(0, 1, 4, 2, 3)),
+ptrBuilder(87),
+),
+appBuilder( // 89
+comBuilder(6,51,List(0, 1, 5, 2, 3, 4)),
+ptrBuilder(88),
+ptrBuilder(86),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+ptrBuilder(85),
+),
+appBuilder( // 90
+comBuilder(6,32,List(0, 1, 5, 2, 3, 4)),
+comBuilder(4,48,List(0, 3, 1, 3, 2, 3)),
+ptrBuilder(89),
+ptrBuilder(80),
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(84),
+),
+appBuilder( // 91
+comBuilder(6,24,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,47,List(0, 4, 1, 2, 4, 3)),
+),
+appBuilder( // 92
+comBuilder(6,26,List(0, 1, 5, 2, 3, 4)),
+ptrBuilder(91),
+ptrBuilder(90),
+comBuilder(2,0,List(0)),
+comBuilder(4,7,List(0, 1, 3, 2)),
+comBuilder(3,2,List(2, 0, 1)),
+),
+appBuilder( // 93
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+comBuilder(3,6,List(0, 2, 1, 2)),
+),
+appBuilder( // 94
+comBuilder(6,26,List(0, 1, 5, 2, 3, 4)),
+comBuilder(6,26,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,19,List(0, 1, 2, 4, 3)),
+ptrBuilder(93),
+ptrBuilder(92),
+ptrBuilder(95),
+),
+ // FUN28Clausify.insert
+appBuilder( // 95
+comBuilder(3,3,List(0, 1, 2)),
+yBuilder(),
+ptrBuilder(99),
+),
+appBuilder( // 96
+comBuilder(5,29,List(0, 1, 4, 2, 4, 3)),
+comBuilder(5,41,List(0, 1, 2, 4, 3, 4)),
+),
+appBuilder( // 97
+comBuilder(6,35,List(0, 1, 2, 5, 3, 4)),
+comBuilder(6,52,List(0, 1, 2, 5, 3, 4)),
+comBuilder(3,2,List(2, 0, 1)),
+ptrBuilder(36),
+comBuilder(2,0,List(0)),
+comBuilder(4,17,List(0, 3, 1, 2, 3)),
+),
+appBuilder( // 98
+comBuilder(5,47,List(0, 4, 1, 4, 2, 3)),
+ptrBuilder(97),
+ptrBuilder(96),
+prmBuilder("<="),
+ptrBuilder(36),
+),
+appBuilder( // 99
+comBuilder(5,31,List(0, 4, 1, 2, 4, 3)),
+ptrBuilder(98),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(36),
+ptrBuilder(36),
+),
+ // FUN29Clausify.split
+appBuilder( // 100
+ptrBuilder(101),
+comBuilder(2,0,List(0)),
+),
+ // FUN30Clausify.spl
+appBuilder( // 101
+comBuilder(4,20,List(0, 1, 3, 2, 3)),
+yBuilder(),
+ptrBuilder(108),
+ptrBuilder(102),
+),
+appBuilder( // 102
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(36),
+ptrBuilder(114),
+),
+appBuilder( // 103
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(36),
+ptrBuilder(112),
+),
+appBuilder( // 104
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(36),
+),
+appBuilder( // 105
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(104),
+ptrBuilder(109),
+),
+appBuilder( // 106
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(1,0,List(0)),
+ptrBuilder(101),
+),
+appBuilder( // 107
+comBuilder(6,24,List(0, 1, 5, 2, 3, 4)),
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+ptrBuilder(106),
+),
+appBuilder( // 108
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+ptrBuilder(107),
+ptrBuilder(105),
+ptrBuilder(103),
+),
+ // FUN31Clausify.Dis
+appBuilder( // 109
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(111),
+ptrBuilder(110),
+),
+appBuilder( // 110
+comBuilder(5,21,List(0, 1, 4, 2, 3)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 111
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(2,0,List(0)),
+),
+ // FUN32Clausify.Neg
+appBuilder( // 112
+comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+ptrBuilder(113),
+),
+appBuilder( // 113
+comBuilder(3,3,List(0, 2, 1)),
+comBuilder(2,0,List(0)),
+),
+ // FUN33Clausify.Sym
+appBuilder( // 114
+comBuilder(5,22,List(0, 1, 2, 3, 4)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+comBuilder(2,1,List(1, 0)),
+),
+ // FUN34Clausify.disin
+appBuilder( // 115
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+ptrBuilder(117),
+ptrBuilder(116),
+ptrBuilder(112),
+ptrBuilder(114),
+),
+appBuilder( // 116
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(120),
+ptrBuilder(115),
+ptrBuilder(115),
+),
+appBuilder( // 117
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(118),
+ptrBuilder(115),
+ptrBuilder(115),
+),
+ // FUN35Clausify.Con
+appBuilder( // 118
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(1,0,List(0)),
+ptrBuilder(119),
+),
+appBuilder( // 119
+comBuilder(6,63,List(0, 1, 2, 5, 3, 4)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)),
+),
+ // FUN36Clausify.din
+appBuilder( // 120
+comBuilder(6,32,List(0, 1, 5, 2, 3, 4)),
+comBuilder(3,6,List(0, 2, 1, 2)),
+ptrBuilder(126),
+ptrBuilder(124),
+ptrBuilder(122),
+ptrBuilder(121),
+),
+appBuilder( // 121
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(127),
+ptrBuilder(114),
+),
+appBuilder( // 122
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(127),
+ptrBuilder(112),
+),
+appBuilder( // 123
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(127),
+),
+appBuilder( // 124
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(123),
+ptrBuilder(109),
+),
+appBuilder( // 125
+comBuilder(6,35,List(0, 1, 2, 5, 3, 4)),
+comBuilder(4,7,List(0, 1, 3, 2)),
+ptrBuilder(118),
+ptrBuilder(120),
+),
+appBuilder( // 126
+comBuilder(6,51,List(0, 1, 5, 2, 3, 4)),
+comBuilder(4,39,List(0, 3, 1, 3, 2, 3)),
+comBuilder(5,54,List(0, 1, 2, 4, 3, 4)),
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(125),
+ptrBuilder(120),
+),
+ // FUN37Clausify.din2
+appBuilder( // 127
+comBuilder(5,47,List(0, 4, 1, 2, 4, 3)),
+ptrBuilder(132),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(109),
+ptrBuilder(114),
+),
+appBuilder( // 128
+comBuilder(4,5,List(0, 1, 3, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(109),
+ptrBuilder(112),
+),
+appBuilder( // 129
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(109),
+ptrBuilder(109),
+),
+appBuilder( // 130
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(118),
+),
+appBuilder( // 131
+comBuilder(5,57,List(0, 1, 2, 4, 3, 4)),
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+ptrBuilder(130),
+ptrBuilder(120),
+ptrBuilder(120),
+),
+appBuilder( // 132
+comBuilder(4,39,List(0, 3, 1, 3, 2, 3)),
+ptrBuilder(131),
+ptrBuilder(129),
+ptrBuilder(128),
+),
+ // FUN38Clausify.negin
+appBuilder( // 133
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+ptrBuilder(141),
+ptrBuilder(140),
+ptrBuilder(139),
+ptrBuilder(114),
+),
+appBuilder( // 134
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(112),
+ptrBuilder(114),
+),
+appBuilder( // 135
+comBuilder(6,36,List(0, 1, 2, 3, 5, 4)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(118),
+ptrBuilder(133),
+ptrBuilder(112),
+ptrBuilder(133),
+),
+appBuilder( // 136
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(135),
+ptrBuilder(112),
+),
+appBuilder( // 137
+comBuilder(6,36,List(0, 1, 2, 3, 5, 4)),
+comBuilder(4,8,List(0, 1, 2, 3)),
+ptrBuilder(109),
+ptrBuilder(133),
+ptrBuilder(112),
+ptrBuilder(133),
+),
+appBuilder( // 138
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(137),
+ptrBuilder(112),
+),
+appBuilder( // 139
+comBuilder(5,9,List(4, 0, 1, 2, 3)),
+ptrBuilder(138),
+ptrBuilder(136),
+ptrBuilder(133),
+ptrBuilder(134),
+),
+appBuilder( // 140
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(109),
+ptrBuilder(133),
+ptrBuilder(133),
+),
+appBuilder( // 141
+comBuilder(5,13,List(0, 1, 2, 4, 3)),
+comBuilder(3,3,List(0, 1, 2)),
+ptrBuilder(118),
+ptrBuilder(133),
+ptrBuilder(133),
+),
+ // FUN39NanoPrelude.replicate
+appBuilder( // 142
+comBuilder(3,2,List(0, 2, 1)),
+ptrBuilder(144),
+comBuilder(2,0,List(0)),
+),
+appBuilder( // 143
+comBuilder(5,12,List(0, 4, 1, 2, 3)),
+comBuilder(5,34,List(0, 1, 4, 2, 4, 3)),
+prmBuilder("<="),
+intBuilder(0),
+ptrBuilder(36),
+),
+appBuilder( // 144
+comBuilder(5,49,List(0, 4, 1, 4, 2, 3)),
+ptrBuilder(143),
+ptrBuilder(142),
+prmBuilder("-"),
+intBuilder(1),
+),
+ // FUN40Clausify.eqv
+appBuilder( // 145
+comBuilder(5,41,List(0, 1, 2, 4, 3, 4)),
+ptrBuilder(147),
+ptrBuilder(109),
+ptrBuilder(112),
+ptrBuilder(146),
+),
+appBuilder( // 146
+comBuilder(4,5,List(0, 1, 3, 2)),
+ptrBuilder(109),
+ptrBuilder(112),
+),
+appBuilder( // 147
+comBuilder(4,15,List(0, 1, 3, 2, 3)),
+ptrBuilder(118),
+),
+)
+}

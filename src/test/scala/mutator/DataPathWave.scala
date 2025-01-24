@@ -9,6 +9,7 @@ import tester._
 // import scala.collection.mutable.ArraySeq
 
 import common._
+import benchmarks._
 
 class DataPathWave extends AnyFlatSpec with Matchers with VerilatorTestRunner{
   val compiled = TestRunnerConfig(withWaveform = true, ephemeral = false).compile(new DataPath)

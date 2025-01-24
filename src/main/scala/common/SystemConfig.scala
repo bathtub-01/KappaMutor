@@ -26,11 +26,11 @@ object SystemConfig {
   val maxAppLen = 6
   val maxAppsPerBody = 4 // spine included
 
-  val heapSize = 128 * 1024 // should be 256*1024 for SKI+ scheme...
-  val stackSizeEach = 512 
+  val heapSize = 512 * 1024 // should be 256*1024 for SKI+ scheme...
+  val stackSizeEach = 1024 
   def stackTotalSize = stackN * stackSizeEach
 
-  val updateStackSize = 1024
+  val updateStackSize = 2048
 
   def atomPayloadSize = atomSize - AtomType.getWidth
 }
