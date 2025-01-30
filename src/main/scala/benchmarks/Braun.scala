@@ -1,8 +1,8 @@
 package benchmarks
 import common.Helper._
  
-// Functions in this file: 18
-// Apps in this file: 33
+// Functions in this file: 15
+// Apps in this file: 34
 // Combinators in this file: 70
 object Braun extends Benchmark {
 override def toString() = "Braun" 
@@ -14,12 +14,12 @@ ptrBuilder(4),
 ptrBuilder(3),
 ),
 appBuilder( // 1
-ptrBuilder(29),
+ptrBuilder(28),
 intBuilder(0),
 intBuilder(255),
 ),
 appBuilder( // 2
-ptrBuilder(26),
+ptrBuilder(25),
 intBuilder(2),
 ptrBuilder(1),
 ),
@@ -30,198 +30,190 @@ ptrBuilder(2),
 ),
  // FUN1Braun.int
 appBuilder( // 4
-comBuilder(3,2,List(2, 0, 1)),
+comBuilder(3,2,List(2, 0, 1)), // XXX
 intBuilder(0),
 intBuilder(1),
 ),
  // FUN2NanoPrelude.all
 appBuilder( // 5
-comBuilder(6,56,List(0, 1, 2, 3, 4, 5)),
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
 yBuilder(),
-comBuilder(4,6,List(0, 1, 2, 3)),
-comBuilder(3,2,List(2, 0, 1)),
 ptrBuilder(7),
-ptrBuilder(6),
 ),
 appBuilder( // 6
-comBuilder(5,13,List(0, 1, 2, 4, 3)),
-comBuilder(3,3,List(0, 1, 2)),
+comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
 ptrBuilder(8),
 ),
- // FUN3Data.Bool_Type.True
 appBuilder( // 7
-comBuilder(2,0,List(0)),
-comBuilder(1,0,List(0)),
+comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
+comBuilder(2,0,List(1)), // X
+ptrBuilder(6),
 ),
- // FUN4Data.Bool.&&
+ // FUN3Data.Bool.&&
 appBuilder( // 8
-comBuilder(2,1,List(1, 0)),
-comBuilder(2,0,List(0)),
+comBuilder(2,1,List(1, 0)), // XX
+comBuilder(2,0,List(0)), // X
 ),
- // FUN5Braun.prop
+ // FUN4Braun.prop
 appBuilder( // 9
-comBuilder(4,17,List(0, 3, 1, 2, 3)),
+comBuilder(4,17,List(0, 3, 1, 2, 3)), // XX(X(XX))
 ptrBuilder(10),
 ptrBuilder(14),
-ptrBuilder(21),
+ptrBuilder(20),
 ),
- // FUN6Braun.equal
+ // FUN5Braun.equal
 appBuilder( // 10
-comBuilder(4,5,List(0, 1, 3, 2)),
-comBuilder(3,6,List(0, 2, 1, 2)),
+comBuilder(5,40,List(3, 4, 0, 1, 2, 4)), // X(XXX)(XX)
+comBuilder(2,0,List(1)), // X
 ptrBuilder(13),
 ptrBuilder(12),
 ),
 appBuilder( // 11
-comBuilder(6,28,List(0, 1, 2, 5, 3, 4)),
-comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
-comBuilder(5,12,List(0, 1, 4, 2, 3)),
-comBuilder(3,3,List(0, 1, 2)),
+comBuilder(6,28,List(0, 1, 2, 5, 3, 4)), // XXX(XX)X
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)), // XXXX(XX)
+comBuilder(5,12,List(0, 1, 4, 2, 3)), // X(XXX)X
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
 prmBuilder("=="),
-comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)), // X
 ),
 appBuilder( // 12
-comBuilder(6,25,List(0, 1, 5, 2, 3, 4)),
-comBuilder(5,16,List(0, 1, 2, 4, 3)),
-comBuilder(3,3,List(0, 1, 2)),
-comBuilder(2,0,List(0)),
+comBuilder(6,25,List(0, 1, 5, 2, 3, 4)), // XX(XX)XX
+comBuilder(5,16,List(0, 1, 2, 4, 3)), // XX(XXX)
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
+comBuilder(2,0,List(0)), // X
 ptrBuilder(11),
 ptrBuilder(10),
 ),
 appBuilder( // 13
-comBuilder(6,58,List(4, 5, 0, 1, 2, 3)),
-ptrBuilder(7),
-comBuilder(3,1,List(0, 1)),
-comBuilder(2,0,List(0)),
-comBuilder(2,0,List(0)),
+comBuilder(3,0,List(0)), // X
+comBuilder(2,0,List(0)), // X
 ),
- // FUN7Braun.toList
+ // FUN6Braun.toList
 appBuilder( // 14
-comBuilder(3,2,List(2, 0, 1)),
+comBuilder(3,2,List(2, 0, 1)), // XXX
 ptrBuilder(15),
-comBuilder(2,0,List(0)),
+comBuilder(2,0,List(0)), // X
 ),
 appBuilder( // 15
-comBuilder(6,25,List(0, 1, 2, 5, 3, 4)),
-comBuilder(5,31,List(0, 1, 2, 3, 4, 3)),
-comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(6,25,List(0, 1, 2, 5, 3, 4)), // XX(XX)XX
+comBuilder(5,31,List(0, 1, 2, 3, 4, 3)), // XX(X(XX))X
+comBuilder(4,8,List(0, 1, 2, 3)), // X(X(XX))
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ptrBuilder(16),
-ptrBuilder(17),
 ptrBuilder(14),
 ),
- // FUN8Data.List_Type.:
+ // FUN7Braun.ilv
 appBuilder( // 16
-comBuilder(4,2,List(0, 1, 2)),
-comBuilder(3,2,List(2, 0, 1)),
+comBuilder(3,6,List(1, 2, 0, 2)), // XX(XX)
+ptrBuilder(19),
 ),
- // FUN9Braun.ilv
 appBuilder( // 17
-comBuilder(3,6,List(1, 2, 0, 2)),
-ptrBuilder(20),
+comBuilder(5,28,List(0, 1, 2, 3, 4, 3)), // XXX(XX)X
+comBuilder(6,37,List(0, 1, 2, 3, 4, 5)), // XXXX(XX)
+comBuilder(5,11,List(0, 1, 2, 4, 3)), // XX(XX)X
+comBuilder(4,8,List(0, 1, 2, 3)), // X(X(XX))
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 18
-comBuilder(5,28,List(0, 1, 2, 3, 4, 3)),
-comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
-comBuilder(5,11,List(0, 1, 2, 4, 3)),
-comBuilder(4,8,List(0, 1, 2, 3)),
+comBuilder(3,2,List(0, 2, 1)), // XXX
+ptrBuilder(17),
 ptrBuilder(16),
 ),
 appBuilder( // 19
-comBuilder(3,2,List(0, 2, 1)),
+comBuilder(5,39,List(0, 3, 1, 4, 2, 4)), // XX(XX)(XX)
+comBuilder(4,15,List(0, 1, 3, 2, 3)), // X(XX)(XX)
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ptrBuilder(18),
-ptrBuilder(17),
 ),
+ // FUN8Braun.fromList
 appBuilder( // 20
-comBuilder(5,39,List(0, 3, 1, 4, 2, 4)),
-comBuilder(4,15,List(0, 1, 3, 2, 3)),
-ptrBuilder(16),
-ptrBuilder(19),
-),
- // FUN10Braun.fromList
-appBuilder( // 21
-comBuilder(6,46,List(5, 0, 1, 2, 3, 4)),
-ptrBuilder(22),
-comBuilder(4,5,List(0, 1, 3, 2)),
-comBuilder(3,3,List(0, 1, 2)),
-ptrBuilder(23),
+comBuilder(3,2,List(2, 0, 1)), // XXX
+comBuilder(2,0,List(1)), // X
 ptrBuilder(21),
 ),
- // FUN11Braun.Empty
+appBuilder( // 21
+comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
+ptrBuilder(22),
+ptrBuilder(20),
+),
+ // FUN9Braun.insertTree
 appBuilder( // 22
-comBuilder(2,0,List(0)),
-comBuilder(1,0,List(0)),
-),
- // FUN12Braun.insertTree
-appBuilder( // 23
-comBuilder(5,46,List(0, 4, 1, 4, 2, 3)),
-ptrBuilder(24),
-ptrBuilder(25),
-ptrBuilder(22),
-ptrBuilder(22),
-),
-appBuilder( // 24
-comBuilder(6,28,List(0, 1, 2, 3, 5, 4)),
-comBuilder(6,32,List(5, 0, 1, 2, 3, 4)),
-comBuilder(4,6,List(0, 1, 2, 3)),
-comBuilder(4,5,List(0, 1, 3, 2)),
-ptrBuilder(25),
+comBuilder(5,46,List(0, 4, 1, 4, 2, 3)), // XX(XXXX)
 ptrBuilder(23),
+ptrBuilder(24),
+comBuilder(2,0,List(1)), // X
+comBuilder(2,0,List(1)), // X
 ),
- // FUN13Braun.Branch
+appBuilder( // 23
+comBuilder(6,28,List(0, 1, 2, 3, 5, 4)), // XXX(XX)X
+comBuilder(6,32,List(5, 0, 1, 2, 3, 4)), // X(XXXX)X
+comBuilder(4,6,List(0, 1, 2, 3)), // XX(XX)
+comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
+ptrBuilder(24),
+ptrBuilder(22),
+),
+ // FUN10Braun.Branch
+appBuilder( // 24
+comBuilder(5,18,List(0, 4, 1, 2, 3)), // X(XXXX)
+comBuilder(2,0,List(0)), // X
+),
+ // FUN11NanoPrelude.replicate
 appBuilder( // 25
-comBuilder(5,18,List(0, 4, 1, 2, 3)),
-comBuilder(2,0,List(0)),
+comBuilder(3,2,List(0, 2, 1)), // XXX
+ptrBuilder(27),
+comBuilder(2,0,List(0)), // X
 ),
- // FUN14NanoPrelude.replicate
 appBuilder( // 26
-comBuilder(3,2,List(0, 2, 1)),
-ptrBuilder(28),
-comBuilder(2,0,List(0)),
-),
-appBuilder( // 27
-comBuilder(5,12,List(0, 4, 1, 2, 3)),
-comBuilder(5,34,List(0, 1, 4, 2, 4, 3)),
+comBuilder(5,12,List(0, 4, 1, 2, 3)), // X(XXX)X
+comBuilder(5,34,List(0, 1, 4, 2, 4, 3)), // X(XX(XX))X
 prmBuilder("<="),
 intBuilder(0),
-ptrBuilder(16),
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
-appBuilder( // 28
-comBuilder(5,49,List(0, 4, 1, 4, 2, 3)),
-ptrBuilder(27),
+appBuilder( // 27
+comBuilder(5,49,List(0, 4, 1, 4, 2, 3)), // XX(X(XXX))
 ptrBuilder(26),
+ptrBuilder(25),
 prmBuilder("-"),
 intBuilder(1),
 ),
- // FUN15NanoPrelude.enumFromTo
-appBuilder( // 29
-comBuilder(6,37,List(0, 1, 2, 3, 4, 5)),
-comBuilder(5,12,List(0, 1, 2, 4, 3)),
-ptrBuilder(30),
-comBuilder(3,2,List(2, 0, 1)),
+ // FUN12NanoPrelude.enumFromTo
+appBuilder( // 28
+comBuilder(6,39,List(0, 1, 2, 3, 4, 5)), // XX(XX)(XX)
+comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
+ptrBuilder(29),
+comBuilder(3,2,List(2, 0, 1)), // XXX
 prmBuilder("<="),
+ptrBuilder(33),
+),
+ // FUN13NanoPrelude.takeWhile
+appBuilder( // 29
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
+yBuilder(),
 ptrBuilder(32),
 ),
- // FUN16NanoPrelude.takeWhile
 appBuilder( // 30
-comBuilder(5,20,List(0, 1, 2, 3, 4)),
-yBuilder(),
-comBuilder(4,6,List(3, 0, 1, 2)),
-comBuilder(2,0,List(0)),
-ptrBuilder(31),
+comBuilder(5,40,List(0, 3, 4, 1, 2, 4)), // X(XXX)(XX)
+comBuilder(4,8,List(0, 1, 2, 3)), // X(X(XX))
+comBuilder(2,0,List(0)), // X
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 31
-comBuilder(6,51,List(0, 1, 2, 3, 4, 5)),
-comBuilder(3,2,List(0, 2, 1)),
-comBuilder(5,40,List(0, 3, 4, 1, 2, 4)),
-comBuilder(4,8,List(0, 1, 2, 3)),
-comBuilder(2,0,List(0)),
-ptrBuilder(16),
+comBuilder(4,4,List(0, 1, 3, 2)), // XXXX
+ptrBuilder(30),
 ),
- // FUN17NanoPrelude.enumFrom
 appBuilder( // 32
-comBuilder(5,49,List(0, 4, 1, 4, 2, 3)),
-ptrBuilder(16),
-ptrBuilder(32),
+comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
+comBuilder(2,0,List(0)), // X
+ptrBuilder(31),
+),
+ // FUN14NanoPrelude.enumFrom
+appBuilder( // 33
+comBuilder(5,49,List(0, 4, 1, 4, 2, 3)), // XX(X(XXX))
+comBuilder(4,2,List(3, 0, 1)), // XXX
+ptrBuilder(33),
 prmBuilder("+"),
 intBuilder(1),
 ),

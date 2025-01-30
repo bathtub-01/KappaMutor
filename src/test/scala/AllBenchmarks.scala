@@ -72,6 +72,7 @@ class AllBenchmarks extends AnyFlatSpec
     var combApp1: Int = 0
     var combApp2: Int = 0
     var combApp3: Int = 0
+    val comArities: Array[Int] = new Array[Int](7)
 
     val simuLog = new PrintWriter("simu-out/" ++ benchmark.toString() ++ ".txt")
 
@@ -125,6 +126,12 @@ class AllBenchmarks extends AnyFlatSpec
       combApp2 = peekPort(dut.io.combApp2, combApp2)
       combApp3 = peekPort(dut.io.combApp3, combApp3)
 
+      val combArity = dut.io.combArity.getValue().asBigInt
+      if(combArity > 0) {
+        // offset: 0 ~ 6
+        comArities(combArity.toInt-1) = comArities(combArity.toInt-1) + 1
+      }
+
       if(dut.io.stkElms.getValue().asBigInt > redStkDepthPeak) {
         redStkDepthPeak = dut.io.stkElms.getValue().asBigInt.toInt
       }
@@ -171,6 +178,10 @@ class AllBenchmarks extends AnyFlatSpec
     simuLog.println(f"combinator with 1-app: ${combApp1} (${combApp1.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
     simuLog.println(f"combinator with 2-app: ${combApp2} (${combApp2.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
     simuLog.println(f"combinator with 3-app: ${combApp3} (${combApp3.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
+    simuLog.println("--------------------------------------")
+    comArities.zipWithIndex.foreach{ case (ar, i) =>
+      simuLog.println(f"combinator with arity ${i+1}: ${ar} (${ar.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
+    }
     simuLog.println("=======================================")
     dut.clock.step(3)
     simuLog.close()

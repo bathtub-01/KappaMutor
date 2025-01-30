@@ -40,6 +40,7 @@ class DataPath extends Module {
     val combApp1 = Output(Bool())
     val combApp2 = Output(Bool())
     val combApp3 = Output(Bool())
+    val combArity = Output(UInt(comArity.W))
   })
   object StmState extends ChiselEnum {
     val idle = Value
@@ -152,6 +153,7 @@ class DataPath extends Module {
   io.combApp1 := false.B
   io.combApp2 := false.B
   io.combApp3 := false.B
+  io.combArity := 0.U
 
   // ==================================================
 
@@ -264,6 +266,8 @@ class DataPath extends Module {
           io.combHole4 := comPayload.pattern >= 4.U && comPayload.pattern <= 8.U
           io.combHole5 := comPayload.pattern >= 9.U && comPayload.pattern <= 22.U
           io.combHole6 := comPayload.pattern >= 23.U
+
+          io.combArity := comPayload.arity
         }
 
         when(/*!needUpdate*/!stuckAll) {
