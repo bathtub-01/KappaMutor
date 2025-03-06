@@ -1,3 +1,8 @@
+// For code in this file:
+// Author: zhutmost
+// release under MIT license
+// url: https://github.com/zhutmost/chipmunk/tree/main
+
 import chisel3._
 import chisel3.reflect.DataMirror
 import svsim._

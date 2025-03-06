@@ -2,11 +2,11 @@ package benchmarks
 import common.Helper._
  
 // Functions in this file: 11
-// Apps in this file: 34
-// Combinators in this file: 69
+// Apps in this file: 40
+// Combinators in this file: 59
 object Permsort extends Benchmark {
 override def toString() = "Permsort" 
-val combinatorCount = 69
+val combinatorCount = 59
 val prog = Seq(
  // FUN0Permsort.main
 appBuilder( // 0
@@ -60,25 +60,27 @@ comBuilder(2,0,List(0)), // X
 ),
  // FUN2Permsort.permSort
 appBuilder( // 10
-comBuilder(4,8,List(0, 1, 2, 3)), // X(X(XX))
+comBuilder(5,20,List(0, 1, 2, 3, 4)), // X(XX(XX))
 ptrBuilder(9),
 ptrBuilder(11),
-ptrBuilder(19),
-),
-appBuilder( // 11
-ptrBuilder(12),
 ptrBuilder(15),
+ptrBuilder(21),
 ),
  // FUN3NanoPrelude.filter
-appBuilder( // 12
+appBuilder( // 11
 comBuilder(3,3,List(0, 1, 2)), // X(XX)
 yBuilder(),
 ptrBuilder(14),
 ),
-appBuilder( // 13
-comBuilder(5,38,List(0, 2, 4, 3, 1, 4)), // X(XX)X(XX)
-comBuilder(4,45,List(0, 1, 3, 2, 1, 3)), // X(XX)(X(XX))
+appBuilder( // 12
+comBuilder(4,6,List(0, 2, 1, 3)), // XX(XX)
 comBuilder(4,2,List(3, 0, 1)), // XXX
+),
+appBuilder( // 13
+comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
+comBuilder(4,30,List(0, 2, 1, 2, 3, 3)), // XX(XXX)X
+comBuilder(5,39,List(0, 3, 1, 4, 2, 4)), // XX(XX)(XX)
+ptrBuilder(12),
 ),
 appBuilder( // 14
 comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
@@ -89,122 +91,128 @@ ptrBuilder(13),
 appBuilder( // 15
 comBuilder(3,2,List(2, 0, 1)), // XXX
 comBuilder(2,0,List(1)), // X
-ptrBuilder(17),
+ptrBuilder(19),
 ),
 appBuilder( // 16
-comBuilder(6,28,List(0, 1, 2, 5, 3, 4)), // XXX(XX)X
-comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
-comBuilder(4,8,List(0, 1, 2, 3)), // X(X(XX))
-ptrBuilder(18),
-prmBuilder("<="),
+comBuilder(4,7,List(0, 1, 2, 3)), // X(XXX)
 ptrBuilder(15),
-),
-appBuilder( // 17
-comBuilder(6,31,List(0, 1, 2, 3, 5, 4)), // XX(X(XX))X
-comBuilder(4,6,List(3, 0, 1, 2)), // XX(XX)
-comBuilder(2,0,List(1)), // X
-comBuilder(3,6,List(0, 2, 1, 2)), // XX(XX)
-ptrBuilder(16),
 comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
- // FUN5Data.Bool.&&
+appBuilder( // 17
+comBuilder(6,40,List(0, 2, 1, 4, 3, 5)), // X(XXX)(XX)
+ptrBuilder(20),
+prmBuilder("<="),
+),
 appBuilder( // 18
+comBuilder(4,11,List(0, 2, 1, 3, 3)), // XX(XX)X
+ptrBuilder(17),
+ptrBuilder(16),
+),
+appBuilder( // 19
+comBuilder(4,6,List(3, 0, 1, 2)), // XX(XX)
+comBuilder(2,0,List(1)), // X
+ptrBuilder(18),
+),
+ // FUN5Data.Bool.&&
+appBuilder( // 20
 comBuilder(2,1,List(1, 0)), // XX
 comBuilder(2,0,List(0)), // X
 ),
  // FUN6Permsort.perm
-appBuilder( // 19
-comBuilder(5,12,List(4, 0, 1, 2, 3)), // X(XXX)X
+appBuilder( // 21
+comBuilder(3,2,List(2, 0, 1)), // XXX
+ptrBuilder(23),
+ptrBuilder(22),
+),
+appBuilder( // 22
+comBuilder(5,15,List(0, 1, 3, 2, 4)), // X(XX)(XX)
+ptrBuilder(24),
+ptrBuilder(30),
+ptrBuilder(21),
+),
+appBuilder( // 23
 comBuilder(4,2,List(3, 0, 1)), // XXX
 comBuilder(2,0,List(0)), // X
 comBuilder(2,0,List(0)), // X
-ptrBuilder(20),
-),
-appBuilder( // 20
-comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-ptrBuilder(21),
-ptrBuilder(27),
-ptrBuilder(19),
 ),
  // FUN7Data.List_Type.concatMap
-appBuilder( // 21
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-yBuilder(),
-ptrBuilder(23),
-),
-appBuilder( // 22
-comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-ptrBuilder(24),
-),
-appBuilder( // 23
-comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
-comBuilder(2,0,List(0)), // X
-ptrBuilder(22),
-),
- // FUN8Data.List_Type.++
 appBuilder( // 24
-comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
 yBuilder(),
 ptrBuilder(26),
 ),
 appBuilder( // 25
-comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-comBuilder(4,2,List(3, 0, 1)), // XXX
+comBuilder(5,15,List(0, 1, 3, 2, 4)), // X(XX)(XX)
+ptrBuilder(27),
 ),
 appBuilder( // 26
-comBuilder(4,6,List(3, 1, 0, 2)), // XX(XX)
+comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
+comBuilder(2,0,List(0)), // X
 ptrBuilder(25),
 ),
- // FUN9Permsort.place
+ // FUN8Data.List_Type.++
 appBuilder( // 27
-comBuilder(5,58,List(0, 1, 4, 2, 4, 3)), // X(XX(XXX))
+comBuilder(4,5,List(0, 1, 3, 2)), // X(XX)X
 yBuilder(),
-ptrBuilder(30),
 ptrBuilder(29),
-comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 28
-comBuilder(6,56,List(0, 1, 2, 3, 4, 5)), // X(XXX(XX))
-comBuilder(3,6,List(0, 2, 1, 2)), // XX(XX)
-comBuilder(4,14,List(0, 1, 2, 1, 3)), // XXX(XX)
-comBuilder(5,41,List(0, 1, 2, 4, 3, 4)), // X(X(XX))(XX)
-comBuilder(4,2,List(3, 0, 1)), // XXX
+comBuilder(4,6,List(0, 2, 1, 3)), // XX(XX)
 comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 29
-comBuilder(6,24,List(0, 1, 5, 2, 3, 4)), // X(XX)XXX
-comBuilder(6,51,List(0, 1, 2, 3, 4, 5)), // X(XXXXX)
+comBuilder(4,6,List(3, 1, 0, 2)), // XX(XX)
 ptrBuilder(28),
-comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
+),
+ // FUN9Permsort.place
+appBuilder( // 30
+comBuilder(5,53,List(0, 1, 4, 2, 4, 3)), // X(XX(XX)X)
+yBuilder(),
+ptrBuilder(36),
+ptrBuilder(33),
 ptrBuilder(31),
 ),
-appBuilder( // 30
-comBuilder(6,60,List(0, 1, 2, 3, 4, 5)), // X(X(XXXX))
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-comBuilder(3,2,List(0, 2, 1)), // XXX
-comBuilder(4,54,List(3, 0, 0, 2, 1, 1)), // X(X(XXX)X)
-comBuilder(4,2,List(3, 0, 1)), // XXX
-comBuilder(2,0,List(0)), // X
-),
- // FUN10NanoPrelude.map
 appBuilder( // 31
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
-yBuilder(),
-ptrBuilder(33),
+comBuilder(5,15,List(0, 1, 3, 2, 4)), // X(XX)(XX)
+ptrBuilder(37),
+comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 32
-comBuilder(5,13,List(0, 1, 2, 4, 3)), // X(X(XX))X
-comBuilder(3,3,List(0, 1, 2)), // X(XX)
+comBuilder(4,58,List(0, 0, 1, 0, 2, 3)), // X(XX(XXX))
 comBuilder(4,2,List(3, 0, 1)), // XXX
 ),
 appBuilder( // 33
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
+comBuilder(4,42,List(0, 2, 3, 1, 2, 3)), // XXX(XXX)
+ptrBuilder(32),
+),
+appBuilder( // 34
+comBuilder(4,2,List(3, 1, 0)), // XXX
+comBuilder(2,0,List(0)), // X
+),
+appBuilder( // 35
+comBuilder(5,5,List(4, 0, 2, 1)), // X(XX)X
+ptrBuilder(34),
+comBuilder(2,0,List(0)), // X
+),
+appBuilder( // 36
+comBuilder(6,45,List(5, 0, 1, 2, 3, 4)), // X(XX)(X(XX))
+ptrBuilder(35),
+),
+ // FUN10NanoPrelude.map
+appBuilder( // 37
+comBuilder(3,3,List(0, 1, 2)), // X(XX)
+yBuilder(),
+ptrBuilder(39),
+),
+appBuilder( // 38
+comBuilder(5,15,List(0, 1, 3, 2, 4)), // X(XX)(XX)
+comBuilder(4,2,List(3, 0, 1)), // XXX
+),
+appBuilder( // 39
 comBuilder(5,16,List(4, 0, 1, 2, 3)), // XX(XXX)
 comBuilder(2,0,List(0)), // X
-ptrBuilder(32),
+ptrBuilder(38),
 ),
 )
 }

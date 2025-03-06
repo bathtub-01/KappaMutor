@@ -23,7 +23,7 @@ object SystemConfig {
   val comPattern = 64
   val comIdxs = 6
 
-  val maxAppLen = 7 // need to be 7 if we want to support arity 7 (longest WHNF)
+  val maxAppLen = 8 // need to be 7 if we want to support arity 7 (longest WHNF)
   val maxAppsPerBody = 4 // spine included
 
   val heapSize = 512 * 1024 // should be 256*1024 for SKI+ scheme...
