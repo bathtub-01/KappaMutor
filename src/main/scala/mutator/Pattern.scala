@@ -1,12 +1,15 @@
 package mutator
 
 abstract class Pattern
+
 case class X() extends Pattern {
   override def toString = "X"
 }
 case class At(p1: Pattern, p2: Pattern) extends Pattern {
-  override def toString =
-    "(" ++ p1.toString ++ p2.toString ++ ")"
+  override def toString = p2 match {
+	case At(_, _) => p1.toString() ++ "(" ++ p2.toString() ++ ")"
+    case _ => p1.toString ++ p2.toString
+  }
 }
 
 object Patterns {
@@ -114,8 +117,11 @@ object Patterns {
 
 object Pattern extends App {
   import Patterns._
-  val pat = allPatterns(2)
-  println(pat)
-  println(parse(pat)._1)
+  // val pat = allPatterns(2)
+  // println(pat)
+  // println(parse(pat)._1)
+
+  allPatterns.foreach(p => println(p))
+
   println(":)")
 }
