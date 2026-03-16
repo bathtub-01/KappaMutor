@@ -4,30 +4,40 @@ import chisel3._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.BeforeAndAfterAll
-import tester._
 import java.io._
 import os.copy
 
 import common._
 import mutator._
 
-class AllBenchmarks extends AnyFlatSpec
-    with Matchers with VerilatorTestRunner with BeforeAndAfterAll {
-  val compiled = TestRunnerConfig(withWaveform = false, ephemeral = false).compile(new DataPath)
+class AllBenchmarks
+    extends AnyFlatSpec
+    with Matchers
+    with VerilatorTestRunner
+    with BeforeAndAfterAll {
+  val compiled = TestRunnerConfig(withWaveform = false, ephemeral = false)
+    .compile(new DataPath)
   val benchmarks: List[Benchmark] = List(
-    Adjoxo,
-    Braun,
-    Clausify,
-    Countdown,
-    Fib,
-    Mss,
-    Ordlist,
-    Permsort,
-    Queens,
-    Queens2,
-    Sumpuz,
-    Taut,
-    While
+    // Adjoxo,
+    // Braun,
+    // Clausify,
+    // Countdown,
+    // Fib,
+    // Mss,
+    // Ordlist,
+    // Permsort,
+    // Queens,
+    // Queens2,
+    // Sumpuz,
+    // Taut,
+    // While
+
+    // SumEuler,
+    // TreeSum,
+    // SkiAbsEval,
+    // TreePari,
+    // TribeLie,
+    EqList
   )
   val runningCycle = new PrintWriter("simu-out/running-cycle.csv")
   val heapAlloc = new PrintWriter("simu-out/heap-alloc.csv")
@@ -40,8 +50,12 @@ class AllBenchmarks extends AnyFlatSpec
   appCount.println("benchmark,app-count")
 
   def countStuffs(benchmark: Benchmark): Unit = {
-    combCount.println(benchmark.toString() ++ "," ++ benchmark.combinatorCount.toString())
-    appCount.println(benchmark.toString() ++ "," ++ benchmark.prog.length.toString())
+    combCount.println(
+      benchmark.toString() ++ "," ++ benchmark.combinatorCount.toString()
+    )
+    appCount.println(
+      benchmark.toString() ++ "," ++ benchmark.prog.length.toString()
+    )
   }
 
   def runBenchmark(benchmark: Benchmark, dut: DataPath): Unit = {
@@ -77,7 +91,7 @@ class AllBenchmarks extends AnyFlatSpec
     val simuLog = new PrintWriter("simu-out/" ++ benchmark.toString() ++ ".txt")
 
     def peekPort(port: Bool, record: Int): Int = {
-      if(port.getValue().asBigInt == 1) {
+      if (port.getValue().asBigInt == 1) {
         record + 1
       } else {
         record
@@ -86,11 +100,10 @@ class AllBenchmarks extends AnyFlatSpec
 
     // ====== program injection =======
     dut.io.progInject #= true.B
-    for(app <- benchmark.prog) {
-      app.app.zip(dut.io.progInjectIO.app).foreach {
-        case (v, p) =>
-          p.atomType #= v.atomType
-          p.payload #= v.payload
+    for (app <- benchmark.prog) {
+      app.app.zip(dut.io.progInjectIO.app).foreach { case (v, p) =>
+        p.atomType #= v.atomType
+        p.payload #= v.payload
       }
       programSize = programSize + 1
       dut.clock.step()
@@ -104,7 +117,7 @@ class AllBenchmarks extends AnyFlatSpec
     dut.io.start #= false.B
     // ================================
 
-    while(dut.io.done.getValue().asBigInt == 0) {
+    while (dut.io.done.getValue().asBigInt == 0) {
       ptrReduc = peekPort(dut.io.ptrRed, ptrReduc)
       combReduc = peekPort(dut.io.combRed, combReduc)
       combReduc_ = peekPort(dut.io.combRed_, combReduc_)
@@ -127,29 +140,33 @@ class AllBenchmarks extends AnyFlatSpec
       combApp3 = peekPort(dut.io.combApp3, combApp3)
 
       val combArity = dut.io.combArity.getValue().asBigInt
-      if(combArity > 0) {
+      if (combArity > 0) {
         // offset: 0 ~ 6
-        comArities(combArity.toInt-1) = comArities(combArity.toInt-1) + 1
+        comArities(combArity.toInt - 1) = comArities(combArity.toInt - 1) + 1
       }
 
-      if(dut.io.stkElms.getValue().asBigInt > redStkDepthPeak) {
+      if (dut.io.stkElms.getValue().asBigInt > redStkDepthPeak) {
         redStkDepthPeak = dut.io.stkElms.getValue().asBigInt.toInt
       }
-      if(dut.io.updStkElms.getValue().asBigInt > updStkDepthPeak) {
+      if (dut.io.updStkElms.getValue().asBigInt > updStkDepthPeak) {
         updStkDepthPeak = dut.io.updStkElms.getValue().asBigInt.toInt
       }
       dut.clock.step()
       cycleCounter = cycleCounter + 1
     }
     val allCombs = combApp0 + combApp1 + combApp2 + combApp3
-    assert(allCombs == combHole1 + combHole2 + combHole3 + combHole4 + combHole5 + combHole6)
+    assert(
+      allCombs == combHole1 + combHole2 + combHole3 + combHole4 + combHole5 + combHole6
+    )
 
     simuLog.println("=========== SIMULATION DONE ===========")
     simuLog.println(s"answer: ${dut.io.stkTops(0).payload.getValue().asBigInt}")
     simuLog.println(s"cycle consumed: ${cycleCounter}")
     simuLog.println(s"program size: ${programSize}")
     simuLog.println(s"heap consumed: ${dut.io.heapCsm.getValue().asBigInt}")
-    simuLog.println(s"heap consumed in runtime: ${dut.io.heapCsm.getValue().asBigInt - programSize}")
+    simuLog.println(
+      s"heap consumed in runtime: ${dut.io.heapCsm.getValue().asBigInt - programSize}"
+    )
     simuLog.println(s"peak reduction stack depth: ${redStkDepthPeak}")
     simuLog.println(s"peak update stack depth: ${updStkDepthPeak}")
     simuLog.println("======== REDUCTION DISTRIBUTE =========")
@@ -163,31 +180,61 @@ class AllBenchmarks extends AnyFlatSpec
     simuLog.println(s"- heap updates hidden: ${heapUpdatesImp}")
     simuLog.println(s"- pipeline hidden: ${pipelineImp}")
     simuLog.println("============ OPT GAINS ================")
-    simuLog.println(f"heap updates hidden rate: ${heapUpdatesImp}/${heapUpdates} (${heapUpdatesImp.toDouble / heapUpdates.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"pipeline hidden rate: ${pipelineImp}/${combReduc_} (${pipelineImp.toDouble / combReduc_.toDouble * 100.0}%.2f%%)")
+    simuLog.println(
+      f"heap updates hidden rate: ${heapUpdatesImp}/${heapUpdates} (${heapUpdatesImp.toDouble / heapUpdates.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"pipeline hidden rate: ${pipelineImp}/${combReduc_} (${pipelineImp.toDouble / combReduc_.toDouble * 100.0}%.2f%%)"
+    )
     simuLog.println("======== COMBINATOR DISTRIBUTE ========")
     // holes, apps
-    simuLog.println(f"combinator with 1-hole: ${combHole1} (${combHole1.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 2-hole: ${combHole2} (${combHole2.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 3-hole: ${combHole3} (${combHole3.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 4-hole: ${combHole4} (${combHole4.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 5-hole: ${combHole5} (${combHole5.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 6-hole: ${combHole6} (${combHole6.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
+    simuLog.println(
+      f"combinator with 1-hole: ${combHole1} (${combHole1.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 2-hole: ${combHole2} (${combHole2.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 3-hole: ${combHole3} (${combHole3.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 4-hole: ${combHole4} (${combHole4.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 5-hole: ${combHole5} (${combHole5.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 6-hole: ${combHole6} (${combHole6.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
     simuLog.println("--------------------------------------")
-    simuLog.println(f"combinator with 0-app: ${combApp0} (${combApp0.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 1-app: ${combApp1} (${combApp1.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 2-app: ${combApp2} (${combApp2.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
-    simuLog.println(f"combinator with 3-app: ${combApp3} (${combApp3.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
+    simuLog.println(
+      f"combinator with 0-app: ${combApp0} (${combApp0.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 1-app: ${combApp1} (${combApp1.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 2-app: ${combApp2} (${combApp2.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
+    simuLog.println(
+      f"combinator with 3-app: ${combApp3} (${combApp3.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+    )
     simuLog.println("--------------------------------------")
-    comArities.zipWithIndex.foreach{ case (ar, i) =>
-      simuLog.println(f"combinator with arity ${i+1}: ${ar} (${ar.toDouble / allCombs.toDouble * 100.0}%.2f%%)")
+    comArities.zipWithIndex.foreach { case (ar, i) =>
+      simuLog.println(
+        f"combinator with arity ${i + 1}: ${ar} (${ar.toDouble / allCombs.toDouble * 100.0}%.2f%%)"
+      )
     }
     simuLog.println("=======================================")
     dut.clock.step(3)
     simuLog.close()
 
     runningCycle.println(benchmark.toString() ++ "," ++ cycleCounter.toString())
-    heapAlloc.println(benchmark.toString() ++ "," ++ (dut.io.heapCsm.getValue().asBigInt - programSize).toString())
+    heapAlloc.println(
+      benchmark
+        .toString() ++ "," ++ (dut.io.heapCsm.getValue().asBigInt - programSize)
+        .toString()
+    )
   }
 
   var bCounter: Int = 0

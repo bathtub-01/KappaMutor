@@ -26,11 +26,11 @@ object SystemConfig {
   val maxAppLen = 8 // need to be 7 if we want to support arity 7 (longest WHNF)
   val maxAppsPerBody = 4 // spine included
 
-  val heapSize = 512 * 1024 // should be 256*1024 for SKI+ scheme...
-  val stackSizeEach = 1024 
+  val heapSize = 256 * 1024 // should be 256*1024 for SKI+ scheme...
+  val stackSizeEach = 1024 // 1024 
   def stackTotalSize = stackN * stackSizeEach
 
-  val updateStackSize = 2048
+  val updateStackSize = 2048 // 2048
 
   def atomPayloadSize = atomSize - AtomType.getWidth
 }

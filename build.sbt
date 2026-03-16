@@ -1,11 +1,10 @@
 // See README.md for license details.
 
-ThisBuild / scalaVersion     := "2.13.14"
+ThisBuild / scalaVersion     := "2.13.18"
 ThisBuild / version          := "0.1.0"
 ThisBuild / organization     := "com.github.bathtub01"
 
-//val chiselVersion = "6.4.3-tywaves-SNAPSHOT"
-val chiselVersion = "6.5.0"
+val chiselVersion = "7.8.0"
 
 lazy val root = (project in file("."))
   .settings(
@@ -13,7 +12,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.chipsalliance" %% "chisel" % chiselVersion,
       "org.scalatest" %% "scalatest" % "3.2.19" % "test",
-      //"com.github.rameloni" %% "tywaves-chisel-api" % "0.4.2-SNAPSHOT"
+      "me.tongfei" % "progressbar" % "0.10.1",
     ),
     scalacOptions ++= Seq(
       "-language:reflectiveCalls",
@@ -24,3 +23,4 @@ lazy val root = (project in file("."))
     ),
     addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chiselVersion cross CrossVersion.full),
   )
+
